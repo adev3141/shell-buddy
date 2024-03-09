@@ -1,9 +1,0 @@
-{
-    "git": {
-        "how to push": "the command to push is: git push"
-    },
-    "docker": {
-        "how to build": "docker build . - Builds an image from a Dockerfile in the current directory"
-        
-    }
-}
