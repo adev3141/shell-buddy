@@ -1,6 +1,7 @@
 {
     "buddy": {
         "how to undo the last commit": "git revert HEAD",
+        "commit": "composite command",
         "how do i check the status of my repo": "git status",
         "how can i see recent commits": "git log",
         "how do i switch to another branch": "git checkout [branch-name]",
