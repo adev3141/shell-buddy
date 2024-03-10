@@ -21,7 +21,6 @@ function executeGitCommands(commands) {
   }
 }
 
-
 function setupGitShellBuddy(args = process.argv) {
 
   program
@@ -91,4 +90,4 @@ if (require.main === module) {
 }
 
 
-module.exports = { initializeGitShellBuddy, setupGitShellBuddy };
+module.exports = { initializeGitShellBuddy, setupGitShellBuddy, executeGitCommands };
