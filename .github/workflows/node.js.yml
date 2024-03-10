@@ -2,9 +2,12 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ] # Runs on main and develop branches
+    paths: 
+      - 'src/**' # Only run CI if there are changes in the 'src' directory
+      - 'test/**' # Also include changes in the 'test' directory
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 jobs:
   build:
@@ -12,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [16.x] # Specify the Node.js version your project uses
 
     steps:
     - uses: actions/checkout@v2
@@ -20,6 +23,11 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: ${{ matrix.node-version }}
+        cache: 'npm' # Caching the npm cache directory
     - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+    - name: Run Linter
+      run: npm run lint # Add a linting step, if you have a lint script in package.json
+    - name: Run Tests
+      run: npm test
+      env:
+        CI: true # Set an environment variable for the test step
