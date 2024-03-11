@@ -75,6 +75,10 @@ function setupGitShellBuddy(args = process.argv) {
     
 
   program.parse(args);
+  // Display help if no command is given.
+  if (!process.argv.slice(2).length) {
+  program.outputHelp();
+}
 }
 
 function initializeGitShellBuddy(args = process.argv) {
