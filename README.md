@@ -1,6 +1,6 @@
 # ShellBuddy
 
-ShellBuddy is your command-line companion for quick and easy access to Git commands and more. It translates plain language questions into precise shell commands, streamlining your workflow and boosting your productivity..
+ShellBuddy is your command-line companion for quick and easy access to Git commands and more. It translates plain language questions into precise shell commands, streamlining your workflow and boosting your productivity...
 
 ## Installation
 
