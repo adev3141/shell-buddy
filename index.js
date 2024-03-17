@@ -30,27 +30,17 @@ program.command('display')
     }
   });
 
-program
-  .command('execute <query...>')
-  .description("Execute a shell command for a given query")
-  .action((queryWords) => {
-    const query = queryWords.join(' ').toLowerCase().trim();
-    if (query.startsWith("commit ")) {
-      const commitMessage = query.substring(7);
-      const commands = [
-        "git add .",
-        `git commit -m "${commitMessage}"`,
-        "git push"
-      ];
-      executeGitCommands(commands);
-    } else {
-      const command = commandsDB.buddy[query];
-      if (command) {
-        executeGitCommands([command]);
-      } else {
-        console.log("Command not found for query:", query);
-      }
-    }
+// Specific command for handling commits
+program.command('commit <message...>')
+  .description("Commit changes with a message")
+  .action((messageParts) => {
+    const commitMessage = messageParts.join(' '); // Correctly join the commit message parts
+    const commands = [
+      "git add .",
+      `git commit -m "${commitMessage}"`,
+      "git push"
+    ];
+    executeGitCommands(commands);
   });
 
 program
