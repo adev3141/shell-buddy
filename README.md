@@ -1,63 +1,59 @@
-ShellBuddy
+# ShellBuddy
 
 ShellBuddy is your command-line companion for quick and easy access to Git commands and more. It translates plain language questions into precise shell commands, streamlining your workflow and boosting your productivity.
 
-Installation
+## Installation
 
 Install ShellBuddy globally via npm:
 
-bash
-Copy code
 npm install -g shellbuddy@beta
+
+
 This will install the beta version of ShellBuddy and add it to your system path, making it available from any terminal.
 
-Usage
+## Usage
 
 Once installed, you can start using ShellBuddy by entering queries like so:
 
 buddy how to undo the last commit
-Output: git revert HEAD
-Display All Commands
+
+**Output:** `git revert HEAD`
+
+### Display All Commands
+
 To list all available commands that ShellBuddy recognizes:
 
 buddy display all commands
 
-Features
+## Features
 
-Natural Language Processing: Understands and interprets plain English questions.
-Comprehensive Git Command Library: Wide range of pre-configured Git commands.
-Extendable: Add your custom commands to the library for personalized usage.
-Contributing
+- **Natural Language Processing**: Understands and interprets plain English questions.
+- **Comprehensive Git Command Library**: Wide range of pre-configured Git commands.
+- **Extendable**: Add your custom commands to the library for personalized usage.
+
+## Contributing
 
 I welcome contributions from the community! To contribute to ShellBuddy and test your changes locally, follow these steps:
 
-Fork the repository.
-Clone your fork (git clone url-of-your-fork).
+1. Fork the repository.
+2. Clone your fork (`git clone url-of-your-fork`).
+3. Create a new branch (`git checkout -b feature-branch`).
+4. Make your changes and add them (`git add .`).
+5. Commit your changes (`git commit -m 'Add some feature'`).
+6. Push to the branch (`git push origin feature-branch`).
+7. Create a new Pull Request.
 
-Create a new branch (git checkout -b feature-branch).
+### Testing Locally with npm link
 
-Make your changes and add them (git add .).
+For local testing of your changes, use `npm link`:
 
-Commit your changes (git commit -m 'Add some feature').
-
-Push to the branch (git push origin feature-branch).
-
-Create a new Pull Request.
-
-Testing Locally with npm link
-
-For local testing of your changes, use npm link:
-
-Navigate to your local ShellBuddy directory.
-
-Run npm link. This creates a symbolic link to your global node_modules directory.
-
-You can now use the buddy command globally which will reflect your local changes.
-
-After testing, run npm unlink to remove the global symlink.
+1. Navigate to your local ShellBuddy directory.
+2. Run `npm link`. This creates a symbolic link to your global `node_modules` directory.
+3. You can now use the `buddy` command globally which will reflect your local changes.
+4. After testing, run `npm unlink` to remove the global symlink.
 
 Please ensure to update tests as appropriate and adhere to the Conventional Commits guideline.
 
-License
+## License
 
 Distributed under the MIT License.
