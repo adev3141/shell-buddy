@@ -48,9 +48,9 @@ function setupGitShellBuddy(args = process.argv) {
       if (query.startsWith("commit ")) {
         const commitMessage = query.substring(7); // Extract commit message
         const commands = [
-          "sudo git add .",
-          `sudo git commit -m "${commitMessage}"`,
-          "sudo git push"
+          "git add .",
+          `git commit -m "${commitMessage}"`,
+          "git push"
         ];
         executeGitCommands(commands);
       } else {
@@ -66,7 +66,7 @@ function setupGitShellBuddy(args = process.argv) {
   // Help command
   program
     .command('help')
-    .description('Display help for using ShellBuddy')
+    .description('Display help for the usage ShellBuddy')
     .action(() => {
       console.log('Usage: call me like this: buddy <query>');
       console.log('Example: buddy how to undo the last commit');
