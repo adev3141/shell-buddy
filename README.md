@@ -13,7 +13,7 @@ This will install the beta version of ShellBuddy and add it to your system path,
 
 ## Usage
 
-Once installed, you can start using ShellBuddy by entering queries like so:
+Once installed, you can start using ShellBuddy by entering queries like:
 
 buddy how to undo the last commit
 
