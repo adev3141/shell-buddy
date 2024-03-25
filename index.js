@@ -34,7 +34,7 @@ program.command('display')
 program.command('commit <message...>')
   .description("Commit changes with a message")
   .action((messageParts) => {
-    const commitMessage = messageParts.join(' '); // Correctly join the commit message parts
+    const commitMessage = messageParts.join(' '); // Correctly join the commit message parts.
     const commands = [
       "git add .",
       `git commit -m "${commitMessage}"`,
