@@ -1,7 +1,8 @@
 #!/usr/bin/env node
+require('dotenv').config();
 const { program } = require('commander');
 const commandsDB = require('./git_commands.json'); // Adjust the path as needed
-
+const { queryOpenAI, processAIResponse } = require('./LLMController');
 const { execSync } = require('child_process');
 
 function executeGitCommands(commands) {
@@ -49,6 +50,18 @@ program
   .action(() => {
     program.outputHelp();
   });
+
+program.command('how to <query...>')
+  .description('Ask a Git related question')
+  .action(async (...args) => {
+      const queryParts = args.slice(0, -1); // Removes the last argument (command object)
+      console.log('queryParts:', queryParts);
+      const query = queryParts.join(' ');
+      const aiResponse = await queryOpenAI(`Git: ${query}`);
+      processAIResponse(aiResponse);
+  });
+
+
 
 program.parse(process.argv);
 
