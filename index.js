@@ -30,6 +30,19 @@ program.command('display')
     }
   });
 
+//system stats command
+program.command('systemstats')
+  .description("Run htop to view system statistics")
+  .action(() => {
+    console.log("buddy running htop...");
+    try {
+      const result = execSync('htop', { stdio: 'inherit' }); // Use stdio: 'inherit' to display the output in the console.
+    } catch (error) {
+      console.error(`Error executing htop: ${error.message}`);
+    }
+  });
+
+
 // Specific command for handling commits
 program.command('commit <message...>')
   .description("Commit changes with a message")
