@@ -55,3 +55,4 @@ program.parse(process.argv);
 if (!process.argv.slice(2).length) {
   program.outputHelp();
 }
+next feature: terminal command to check system threads, ram usage, cpu usage, disk usage, temperature and other such indicators. to check all running application are running on which thread. and other such indicator useful for a hard core developer on mac
