@@ -8,7 +8,6 @@ Install ShellBuddy globally via npm:
 
 npm install -g shellbuddy@beta
 
-
 This will install the beta version of ShellBuddy and add it to your system path, making it available from any terminal.
 
 ## Usage

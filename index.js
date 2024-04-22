@@ -1,7 +1,10 @@
 #!/usr/bin/env node
+//Shebang line: #!/usr/bin/env node - This line specifies the path to the Node.js interpreter, 
+//allowing the script to be executed directly from the command line.
+
 const { program } = require('commander');
 const commandsDB = require('./git_commands.json'); // Adjust the path as needed
-
+const axios = require('axios');
 const { execSync } = require('child_process');
 
 function executeGitCommands(commands) {
@@ -15,6 +18,33 @@ function executeGitCommands(commands) {
     }
   });
 }
+
+program
+  .command('cohere <query>')
+  .description('Interact with Cohere LLM')
+  .action(async (query) => {
+    try {
+      const response = await axios.post('https://api.cohere.com/predict', {
+        model: 'command',
+        inputs: {
+          text: query
+        }
+      }, {
+        headers: {
+          'Authorization': `s2MaBd1UGDaenmky8PRCLSBebdbgX5fvqquzbIvp`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.data.status === 'success') {
+        console.log(response.data.results.text[0]);
+      } else {
+        console.error('Error interacting with Cohere LLM');
+      }
+    } catch (error) {
+      console.error('Error interacting with Cohere LLM:', error.message);
+    }
+  });
 
 program
   .name("gitshellbuddy")
