@@ -1,11 +1,18 @@
 #!/usr/bin/env node
 //Shebang line: #!/usr/bin/env node - This line specifies the path to the Node.js interpreter, 
 //allowing the script to be executed directly from the command line.
-
+const { CohereClient } = require('cohere-ai');
 const { program } = require('commander');
 const commandsDB = require('./git_commands.json'); // Adjust the path as needed
 const axios = require('axios');
 const { execSync } = require('child_process');
+
+const cohereClient = new CohereClient({
+  auth: {
+    // Replace with your actual Cohere API key
+    apiKey: 'tkhCHTdt5MtuFdc7uB7o1XrhHJFFrY6nt63DpsC6'
+  }
+});
 
 function executeGitCommands(commands) {
   commands.forEach(command => {
@@ -19,28 +26,30 @@ function executeGitCommands(commands) {
   });
 }
 
+// Command for interacting with Cohere LLM
 program
-  .command('cohere <query>')
-  .description('Interact with Cohere LLM')
-  .action(async (query) => {
-    try {
-      const response = await axios.post('https://api.cohere.com/predict', {
-        model: 'command',
-        inputs: {
-          text: query
-        }
-      }, {
-        headers: {
-          'Authorization': `s2MaBd1UGDaenmky8PRCLSBebdbgX5fvqquzbIvp`,
-          'Content-Type': 'application/json'
-        }
-      });
+  .command('cohere <query> [model] [stream]')
+  .description('Interact with Cohere LLM. Optional parameters: model, stream')
+  .action(async (query, model = 'command-r-plus', stream = false) => {
+    const params = {
+      message: query,
+      model: model,
+      stream: stream,
+      preamble: 'You are helpful.',
+    };
 
-      if (response.data.status === 'success') {
-        console.log(response.data.results.text[0]);
+    try {
+      const response = await cohereClient.chat(params);
+
+      if (response.toolCalls.length > 0) {
+        console.log('Tool Calls:');
+        for (const tool of response.toolCalls) {
+          console.log(`- ${tool.name}`, tool.parameters);
+        }
       } else {
-        console.error('Error interacting with Cohere LLM');
+        console.log('Response:', response.generations[0].text);
       }
+
     } catch (error) {
       console.error('Error interacting with Cohere LLM:', error.message);
     }
