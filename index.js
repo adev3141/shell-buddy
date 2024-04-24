@@ -77,7 +77,6 @@ program.command('systemstats')
     }
   });
 
-
 // Specific command for handling commits
 program.command('commit <message...>')
   .description("Commit changes with a message")

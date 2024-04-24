@@ -1,0 +1,51 @@
++---------------------+
+| 1. Script Invocation|
++----------+----------+
+           |
+           v
++----------+----------+
+| 2. OS Processes     |
+|    Shebang Line     |
++----------+----------+
+           |
+           v
++----------+----------+
+| 3. Node.js Interpreter Starts |
++----------+----------+
+           |
+           v
++----------+----------+
+| 4. Commander.js Parses  |
+|    Arguments           |
++----------+----------+
+           |
+           v
++----------+----------+
+| 5. Command Execution  |
++----------+----------+
+           |
+           v
++----------+----------+
+| 6. Script Executes   |
+|    Command Logic     |
++---------------------+
+
+
+Flowchart Description
+Script Invocation: The user runs the script from the command line.
+OS Processes Shebang Line:
+The operating system checks the first line of the script.
+If the line starts with #!, it uses the specified path to find the interpreter.
+The script is passed to the interpreter (e.g., /usr/bin/env node finds and runs Node.js).
+Node.js Interpreter Starts:
+Node.js starts and reads the script, ignoring the shebang line as it’s treated as a comment in JavaScript.
+Commander.js Parses Arguments:
+Node.js executes the script where Commander.js is set up.
+Commander.js processes process.argv to parse command-line arguments and options.
+It matches input against defined commands and options.
+Command Execution:
+If a match is found, Commander.js executes the corresponding action function.
+If no match is found or required parameters are missing, it outputs help or an error message.
+Script Executes Command Logic:
+The action function associated with the command runs.
+The script performs the tasks defined in the function based on the user’s input.
