@@ -52,7 +52,7 @@ program
   });
 
 program
-  .name("gitshellbuddy")
+  .name("shellbuddy")
   .description("CLI tool to provide git commands for common operations")
   .version("1.0.0-beta.1");
 
