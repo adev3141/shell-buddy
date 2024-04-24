@@ -4,24 +4,12 @@
 const { CohereClient } = require('cohere-ai');
 const { program } = require('commander');
 const commandsDB = require('./git_commands.json'); // Adjust the path as needed
-const axios = require('axios');
-const { execSync } = require('child_process');
+const { executeGitCommands } = require('./functions');
+
 
 const cohereClient = new CohereClient({
   token: 'tkhCHTdt5MtuFdc7uB7o1XrhHJFFrY6nt63DpsC6'
 });
-
-function executeGitCommands(commands) {
-  commands.forEach(command => {
-    console.log(`Executing: ${command}`);
-    try {
-      const result = execSync(command, { stdio: 'pipe', encoding: 'utf-8' });
-      console.log(result);
-    } catch (error) {
-      console.error(`Error executing command '${error.cmd}': ${error.message}`);
-    }
-  });
-}
 
 // Define a new CLI command 'cohere' that takes one argument <message>
 program
