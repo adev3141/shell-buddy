@@ -4,12 +4,29 @@
 const { CohereClient } = require('cohere-ai');
 const { program } = require('commander');
 const commandsDB = require('./git_commands.json'); // Adjust the path as needed
-const { executeGitCommands } = require('./functions');
-
+const axios = require('axios');
+const { execSync } = require('child_process');
 
 const cohereClient = new CohereClient({
   token: 'tkhCHTdt5MtuFdc7uB7o1XrhHJFFrY6nt63DpsC6'
 });
+
+program
+  .name("shellbuddy")
+  .description("CLI tool to provide git commands for common operations")
+  .version("1.0.0-beta.1");
+
+function executeGitCommands(commands) {
+  commands.forEach(command => {
+    console.log(`Executing: ${command}`);
+    try {
+      const result = execSync(command, { stdio: 'pipe', encoding: 'utf-8' });
+      console.log(result);
+    } catch (error) {
+      console.error(`Error executing command '${error.cmd}': ${error.message}`);
+    }
+  });
+}
 
 // Define a new CLI command 'cohere' that takes one argument <message>
 program
@@ -38,11 +55,6 @@ program
       console.error('Error interacting with Cohere LLM:', error.message);
     }
   });
-
-program
-  .name("shellbuddy")
-  .description("CLI tool to provide git commands for common operations")
-  .version("1.0.0-beta.1");
 
 program.command('display')
   .description('Display all available commands')
@@ -84,6 +96,9 @@ program
   .action(() => {
     program.outputHelp();
   });
+
+console.log(program);
+
 
 program.parse(process.argv);
 
