@@ -28,6 +28,20 @@ function executeGitCommands(commands) {
   });
 }
 
+// Specific command for handling commits
+program.command('commit <message...>')
+  .description("Commit changes with a message")
+  .action((messageParts) => {
+    const commitMessage = messageParts.join(' '); // Correctly join the commit message parts.
+    const commands = [
+      "git add .",
+      `git commit -m "${commitMessage}"`,
+      "git push"
+    ];
+    executeGitCommands(commands);
+  });
+
+
 // Define a new CLI command 'cohere' that takes one argument <message>
 program
   .command('cohere <message>') // Define command syntax with <message> as a required parameter
@@ -77,19 +91,6 @@ program.command('systemstats')
     }
   });
 
-// Specific command for handling commits
-program.command('commit <message...>')
-  .description("Commit changes with a message")
-  .action((messageParts) => {
-    const commitMessage = messageParts.join(' '); // Correctly join the commit message parts.
-    const commands = [
-      "git add .",
-      `git commit -m "${commitMessage}"`,
-      "git push"
-    ];
-    executeGitCommands(commands);
-  });
-
 program
   .command('help', { isDefault: true })
   .description('Display help for using ShellBuddy')
@@ -99,9 +100,10 @@ program
 
 console.log(program);
 
-
 program.parse(process.argv);
 
 if (!process.argv.slice(2).length) {
   program.outputHelp();
 }
+
+module.exports = { program, executeGitCommands };
