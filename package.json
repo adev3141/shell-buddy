@@ -19,7 +19,6 @@
   "author": "Adev",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.6.8",
     "cohere": "^1.1.1",
     "cohere-ai": "^7.9.5",
     "commander": "^12.0.0",

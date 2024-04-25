@@ -4,7 +4,6 @@
 const { CohereClient } = require('cohere-ai');
 const { program } = require('commander');
 const commandsDB = require('./git_commands.json'); // Adjust the path as needed
-const axios = require('axios');
 const { execSync } = require('child_process');
 
 const cohereClient = new CohereClient({
