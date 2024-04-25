@@ -39,7 +39,7 @@ If the line starts with #!, it uses the specified path to find the interpreter.
 The script is passed to the interpreter (e.g., /usr/bin/env node finds and runs Node.js).
 Node.js Interpreter Starts:
 Node.js starts and reads the script, ignoring the shebang line as it’s treated as a comment in JavaScript.
-Commander.js Parses Arguments:
+Commander.js Parses Arguments.:
 Node.js executes the script where Commander.js is set up.
 Commander.js processes process.argv to parse command-line arguments and options.
 It matches input against defined commands and options.
