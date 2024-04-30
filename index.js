@@ -15,7 +15,7 @@ program
   .description("CLI tool to provide git commands for common operations")
   .version("1.0.0-beta.1");
 
-function executeGitCommands(commands) {
+function executeGitCommit(commands) {
   commands.forEach(command => {
     console.log(`Executing: ${command}`);
     try {
@@ -37,7 +37,7 @@ program.command('commit <message...>')
       `git commit -m "${commitMessage}"`,
       "git push"
     ];
-    executeGitCommands(commands);
+    executeGitCommit(commands);
   });
 
 
