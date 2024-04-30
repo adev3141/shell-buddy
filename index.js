@@ -105,4 +105,4 @@ if (!process.argv.slice(2).length) {
   program.outputHelp();
 }
 
-module.exports = { program, executeGitCommands };
+module.exports = { program, executeGitCommit };

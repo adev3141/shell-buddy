@@ -1,4 +1,4 @@
-const { program, executeGitCommands } = require('../index'); // Adjust the path as needed
+const { program, executeGitCommit } = require('../index'); // Adjust the path as needed
 const { execSync } = require('child_process');
 jest.mock('child_process');
 
