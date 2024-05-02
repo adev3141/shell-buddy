@@ -7,11 +7,6 @@ const commandsDB = require('./git_commands.json'); // Adjust the path as needed
 const { execSync } = require('child_process');
 const { spawn } = require('child_process');
 
-
-const cohereClient = new CohereClient({
-  token: 'tkhCHTdt5MtuFdc7uB7o1XrhHJFFrY6nt63DpsC6'
-});
-
 program
   .name("shellbuddy")
   .description("CLI tool to provide git commands for common operations")
@@ -41,44 +36,44 @@ program.command('commit <message...>')
     ];
     executeGitCommit(commands);
   });
-
+  
   program
-  .command('llama <message>')
-  .description('Interact with local Llama model using ollama')
-  .action((message) => {
-    try {
-      // Create a child process to run 'ollama run llama3'
-      const ollamaProcess = spawn('ollama', ['run', 'llama3'], { shell: true });
-
-      // Initialize a buffer to collect stdout data
-      let outputBuffer = '';
-
-      // Handle the standard output from the process
-      ollamaProcess.stdout.on('data', (data) => {
-        outputBuffer += data.toString();
-      });
-
-      ollamaProcess.stderr.on('data', (data) => {
-        const output = data.toString();
-        // Filtering out spinner characters
-        if (!output.match(/[⠙⠹⠸⠼⠴⠦⠧⠇⠏⠋]/)) {
-          console.error(`Error from llama3: ${output}`);
-        }
-      });
-
-      ollamaProcess.on('close', (code) => {
-        console.log(`ollama process exited with code ${code}`);
-        // Output all collected data at once to avoid piecemeal logging
-        console.log(outputBuffer);
-      });
-
-      // Send the message to llama3 via stdin
-      ollamaProcess.stdin.write(`${message}\n`);
-      ollamaProcess.stdin.end();
-    } catch (error) {
-      console.error('Error interacting with local llama3:', error.message);
-    }
-  });
+    .command('llama')
+    .description('Interact with local Llama model using ollama')
+    .argument('<message...>', 'Message to send to llama')
+    .action((messageParts) => {
+      const message = messageParts.join(' ');
+      console.log(`Sending message to llama3: ${message}`);
+      try {
+        const ollamaProcess = spawn('ollama', ['run', 'llama3'], { shell: true });
+  
+        ollamaProcess.stdout.on('data', (data) => {
+          console.log('Receiving data from llama3:', data.toString());
+        });
+  
+        ollamaProcess.stderr.on('data', (data) => {
+          const errorOutput = data.toString();
+          if (!errorOutput.match(/[⠙⠹⠸⠼⠴⠦⠧⠇⠏⠋]/)) {
+            console.error('Error from llama3:', errorOutput);
+          }
+        });
+  
+        ollamaProcess.on('close', (code) => {
+          if (code !== 0) {
+            console.error(`ollama process exited with error code ${code}`);
+          } else {
+            console.log('ollama process completed successfully');
+          }
+        });
+  
+        ollamaProcess.stdin.write(`${message}\n`);
+        ollamaProcess.stdin.end();
+      } catch (error) {
+        console.error('Error interacting with local llama3:', error.message);
+      }
+    });
+  
+  program.parse(process.argv);  
 
 program.command('display')
   .description('Display all available commands')
