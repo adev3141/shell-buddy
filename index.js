@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 //Shebang line: #!/usr/bin/env node - This line specifies the path to the Node.js interpreter, 
 //allowing the script to be executed directly from the command line.
-const { CohereClient } = require('cohere-ai');
 const { program } = require('commander');
 const commandsDB = require('./git_commands.json'); // Adjust the path as needed
 const { execSync } = require('child_process');
@@ -38,42 +37,43 @@ program.command('commit <message...>')
   });
   
   program
-    .command('llama')
-    .description('Interact with local Llama model using ollama')
-    .argument('<message...>', 'Message to send to llama')
-    .action((messageParts) => {
-      const message = messageParts.join(' ');
-      console.log(`Sending message to llama3: ${message}`);
-      try {
-        const ollamaProcess = spawn('ollama', ['run', 'llama3'], { shell: true });
-  
-        ollamaProcess.stdout.on('data', (data) => {
-          console.log('Receiving data from llama3:', data.toString());
-        });
-  
-        ollamaProcess.stderr.on('data', (data) => {
-          const errorOutput = data.toString();
-          if (!errorOutput.match(/[⠙⠹⠸⠼⠴⠦⠧⠇⠏⠋]/)) {
-            console.error('Error from llama3:', errorOutput);
-          }
-        });
-  
-        ollamaProcess.on('close', (code) => {
-          if (code !== 0) {
-            console.error(`ollama process exited with error code ${code}`);
-          } else {
-            console.log('ollama process completed successfully');
-          }
-        });
-  
-        ollamaProcess.stdin.write(`${message}\n`);
-        ollamaProcess.stdin.end();
-      } catch (error) {
-        console.error('Error interacting with local llama3:', error.message);
-      }
-    });
-  
-  program.parse(process.argv);  
+  .command('llama')
+  .description('Interact with local Llama model using ollama')
+  .argument('<message...>', 'Message to send to llama')
+  .action((messageParts) => {
+    const message = messageParts.join(' ');
+    console.log(`Sending message to llama3: ${message}`);
+
+    try {
+      const ollamaProcess = spawn('ollama', ['run', 'llama3'], { shell: true });
+      let fullOutput = ''; // Buffer for stdout
+
+      ollamaProcess.stdout.on('data', (data) => {
+        fullOutput += data.toString(); // Append data to buffer
+      });
+
+      ollamaProcess.stderr.on('data', (data) => {
+        const errorOutput = data.toString().trim();
+        if (errorOutput && !errorOutput.match(/[\u2800-\u28FF]/g)) {
+          console.error('Error from llama3:', errorOutput);
+        }
+      });
+
+      ollamaProcess.on('close', (code) => {
+        if (code !== 0) {
+          console.error(`ollama process exited with error code ${code}`);
+        } else {
+          console.log('ollama process completed successfully');
+          console.log('Full output from llama3:', fullOutput); // Log full output at once
+        }
+      });
+
+      ollamaProcess.stdin.write(`${message}\n`);
+      ollamaProcess.stdin.end();
+    } catch (error) {
+      console.error('Error interacting with local llama3:', error.message);
+    }
+  });
 
 program.command('display')
   .description('Display all available commands')
