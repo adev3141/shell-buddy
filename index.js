@@ -5,6 +5,10 @@ const { program } = require('commander');
 const commandsDB = require('./git_commands.json'); // Adjust the path as needed
 const { execSync } = require('child_process');
 const { spawn } = require('child_process');
+const { promisify } = require('util');
+const ollama = require('ollama');
+
+const delay = promisify(setTimeout);
 
 program
   .name("shellbuddy")
@@ -23,6 +27,40 @@ function executeGitCommit(commands) {
   });
 }
 
+// Function to handle interaction with llama3 using ollama
+async function interactWithLlama3(prompt) {
+  console.log(`Sending prompt to llama3: ${prompt}`);
+
+  // Set a timeout to abort the request if it takes too long (e.g., 10 seconds)
+  const timeoutId = setTimeout(() => {
+      console.log('\nAborting request due to timeout...\n');
+      ollama.abort();
+  }, 10000);
+
+  try {
+      // Streaming response from llama3
+      const stream = await ollama.generate({
+          model: 'llama3',
+          prompt: prompt,
+          stream: true,
+          keep_alive: 300  // Optional: adjust keep_alive time as needed
+      });
+
+      // Processing each part of the stream
+      for await (const chunk of stream) {
+          process.stdout.write(chunk.response);
+      }
+  } catch (error) {
+      if (error.name === 'AbortError') {
+          console.log('The request was aborted.');
+      } else {
+          console.error('An error occurred:', error);
+      }
+  } finally {
+      clearTimeout(timeoutId);  // Clear the timeout
+  }
+}
+
 // Specific command for handling commits
 program.command('commit <message...>')
   .description("Commit changes with a message")
@@ -35,46 +73,17 @@ program.command('commit <message...>')
     ];
     executeGitCommit(commands);
   });
-  
-  program
+
+// Commander setup to handle CLI commands
+program
   .command('llama')
   .description('Interact with local Llama model using ollama')
   .argument('<message...>', 'Message to send to llama')
   .action((messageParts) => {
-    const message = messageParts.join(' ');
-    console.log(`Sending message to llama3: ${message}`);
-
-    try {
-      const ollamaProcess = spawn('ollama', ['run', 'llama3'], { shell: true });
-      let fullOutput = ''; // Buffer for stdout
-
-      ollamaProcess.stdout.on('data', (data) => {
-        fullOutput += data.toString(); // Append data to buffer
-      });
-
-      ollamaProcess.stderr.on('data', (data) => {
-        const errorOutput = data.toString().trim();
-        if (errorOutput && !errorOutput.match(/[\u2800-\u28FF]/g)) {
-          console.error('Error from llama3:', errorOutput);
-        }
-      });
-
-      ollamaProcess.on('close', (code) => {
-        if (code !== 0) {
-          console.error(`ollama process exited with error code ${code}`);
-        } else {
-          console.log('ollama process completed successfully');
-          console.log('Full output from llama3:', fullOutput); // Log full output at once
-        }
-      });
-
-      ollamaProcess.stdin.write(`${message}\n`);
-      ollamaProcess.stdin.end();
-    } catch (error) {
-      console.error('Error interacting with local llama3:', error.message);
-    }
+      const message = messageParts.join(' ');
+      interactWithLlama3(message);
   });
-
+  
 program.command('display')
   .description('Display all available commands')
   .action(() => {
