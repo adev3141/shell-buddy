@@ -43,7 +43,6 @@ async function interactWithLlama3(prompt) {
           model: 'llama3',
           prompt: prompt,
           stream: true,
-          keep_alive: 300  // Optional: adjust keep_alive time as needed
       });
 
       // Processing each part of the stream
