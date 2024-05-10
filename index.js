@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 //Shebang line: #!/usr/bin/env node - This line specifies the path to the Node.js interpreter, 
 //allowing the script to be executed directly from the command line.
-const { program } = require('commander');
-const commandsDB = require('./git_commands.json'); // Adjust the path as needed
-const { execSync } = require('child_process');
-const { spawn } = require('child_process');
-const { promisify } = require('util');
-const ollama = require('ollama');
+import { program } from 'commander';
+import commandsDB from './git_commands.json' assert { type: 'json' };
+import { execSync, spawn } from 'child_process';
+import { promisify } from 'util';
+import ollama from 'ollama';
 
-const delay = promisify(setTimeout);
+
 
 program
   .name("shellbuddy")
@@ -27,39 +26,19 @@ function executeGitCommit(commands) {
   });
 }
 
-// Function to handle interaction with llama3 using ollama
+// Function to handle interaction with Llama2 using ollama
 async function interactWithLlama3(prompt) {
-  console.log(`Sending prompt to llama3: ${prompt}`);
-
-  // Set a timeout to abort the request if it takes too long (e.g., 10 seconds)
-  const timeoutId = setTimeout(() => {
-      console.log('\nAborting request due to timeout...\n');
-      ollama.abort();
-  }, 10000);
-
+  console.log(`Sending prompt to llama2: ${prompt}`);
   try {
-      // Streaming response from llama3
-      const stream = await ollama.generate({
-          model: 'llama3',
-          prompt: prompt,
-          stream: true,
-      });
-
-      // Processing each part of the stream
-      for await (const chunk of stream) {
-          process.stdout.write(chunk.response);
-      }
+    const response = await ollama.chat({
+      model: 'llama2',
+      messages: [{ role: 'user', content: prompt }],
+    });
+    console.log(response.messages[response.messages.length - 1].content);
   } catch (error) {
-      if (error.name === 'AbortError') {
-          console.log('The request was aborted.');
-      } else {
-          console.error('An error occurred:', error);
-      }
-  } finally {
-      clearTimeout(timeoutId);  // Clear the timeout
+    console.error('An error occurred:', error);
   }
 }
-
 // Specific command for handling commits
 program.command('commit <message...>')
   .description("Commit changes with a message")
@@ -119,4 +98,4 @@ if (!process.argv.slice(2).length) {
   program.outputHelp();
 }
 
-module.exports = { program, executeGitCommit };
+export { program, executeGitCommit };

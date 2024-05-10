@@ -3,6 +3,7 @@
   "version": "1.0.0-beta.1",
   "description": "A convenient command-line tool for simplifying shell operations",
   "main": "index.js",
+  "type": "module",
   "bin": {
     "buddy": "./index.js"
   },
