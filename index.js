@@ -7,8 +7,6 @@ import { execSync, spawn } from 'child_process';
 import { promisify } from 'util';
 import ollama from 'ollama';
 
-
-
 program
   .name("shellbuddy")
   .description("CLI tool to provide git commands for common operations")
@@ -28,13 +26,20 @@ function executeGitCommit(commands) {
 
 // Function to handle interaction with Llama2 using ollama
 async function interactWithLlama3(prompt) {
-  console.log(`Sending prompt to llama2: ${prompt}`);
+  console.log(`Sending prompt to Llama model: ${prompt}`);
+
   try {
     const response = await ollama.chat({
-      model: 'llama2',
+      model: 'llama3',  // Ensure this is the correct model name
       messages: [{ role: 'user', content: prompt }],
     });
-    console.log(response.messages[response.messages.length - 1].content);
+    console.log('Response received:', response);  // Log the entire response object
+
+    if (response.message) {
+      console.log(response.message.content);  // Display the response message content
+    } else {
+      console.log('No message found in the response.');
+    }
   } catch (error) {
     console.error('An error occurred:', error);
   }
