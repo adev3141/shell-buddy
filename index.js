@@ -1,9 +1,6 @@
 #!/usr/bin/env node
-//Shebang line: #!/usr/bin/env node - This line specifies the path to the Node.js interpreter, 
-//allowing the script to be executed directly from the command line.
 import { program } from 'commander';
-import commandsDB from './git_commands.json' assert { type: 'json' };
-import { execSync, spawn } from 'child_process';
+import { execSync } from 'child_process';
 import { promisify } from 'util';
 import ollama from 'ollama';
 
@@ -24,17 +21,15 @@ function executeGitCommit(commands) {
   });
 }
 
-// Function to handle interaction with Llama2 using ollama
+// Function to handle interaction with Llama3 using ollama
 async function interactWithLlama3(prompt) {
   console.log(`Sending prompt to Llama model: ${prompt}`);
-
   try {
     const response = await ollama.chat({
       model: 'llama3',  // Ensure this is the correct model name
       messages: [{ role: 'user', content: prompt }],
     });
     console.log('Response received:', response);  // Log the entire response object
-
     if (response.message) {
       console.log(response.message.content);  // Display the response message content
     } else {
@@ -44,11 +39,11 @@ async function interactWithLlama3(prompt) {
     console.error('An error occurred:', error);
   }
 }
-// Specific command for handling commits
+
 program.command('commit <message...>')
   .description("Commit changes with a message")
   .action((messageParts) => {
-    const commitMessage = messageParts.join(' '); // Correctly join the commit message parts.
+    const commitMessage = messageParts.join(' '); 
     const commands = [
       "git add .",
       `git commit -m "${commitMessage}"`,
@@ -57,43 +52,40 @@ program.command('commit <message...>')
     executeGitCommit(commands);
   });
 
-// Commander setup to handle CLI commands
-program
-  .command('llama')
-  .description('Interact with local Llama model using ollama')
-  .argument('<message...>', 'Message to send to llama')
-  .action((messageParts) => {
-      const message = messageParts.join(' ');
-      interactWithLlama3(message);
-  });
-  
 program.command('display')
   .description('Display all available commands')
   .action(() => {
     console.log('Available Commands:');
-    for (const query in commandsDB.buddy) {
-      console.log(`- ${query}`);
-    }
+    console.log('- systemstats');
+    console.log('- commit <message...>');
+    console.log('- help');
   });
 
-//system stats command
 program.command('systemstats')
   .description("Run htop to view system statistics")
   .action(() => {
     console.log("buddy running htop...");
     try {
-      const result = execSync('htop', { stdio: 'inherit' }); // Use stdio: 'inherit' to display the output in the console.
+      const result = execSync('htop', { stdio: 'inherit' });
     } catch (error) {
       console.error(`Error executing htop: ${error.message}`);
     }
   });
 
-program
-  .command('help', { isDefault: true })
+program.command('help')
   .description('Display help for using ShellBuddy')
   .action(() => {
     program.outputHelp();
   });
+
+// Default command handling
+program
+  .argument('<command...>', 'Command to execute')
+  .action((commandParts) => {
+      const fullCommand = commandParts.join(' '); // Join all parts to form the full command
+      interactWithLlama3(fullCommand);
+  });
+
 
 console.log(program);
 
