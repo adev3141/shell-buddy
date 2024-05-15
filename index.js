@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 //Shebang line: #!/usr/bin/env node - This line specifies the path to the Node.js interpreter, 
 //allowing the script to be executed directly from the command line.
+
 import { program } from 'commander';
 import { execSync } from 'child_process';
-import { promisify } from 'util';
 import ollama from 'ollama';
 
 program
@@ -23,17 +23,16 @@ function executeGitCommit(commands) {
   });
 }
 
-// Function to handle interaction with Llama3 using ollama
 async function interactWithLlama3(prompt) {
   console.log(`Sending prompt to Llama model: ${prompt}`);
   try {
     const response = await ollama.chat({
-      model: 'llama3',  // Ensure this is the correct model name
+      model: 'llama3',
       messages: [{ role: 'user', content: prompt }],
     });
-    console.log('Response received:', response);  // Log the entire response object
+    console.log('Response received:', response);
     if (response.message) {
-      console.log(response.message.content);  // Display the response message content
+      console.log(response.message.content);
     } else {
       console.log('No message found in the response.');
     }
@@ -80,21 +79,10 @@ program.command('help')
     program.outputHelp();
   });
 
-// Default command handling
-program
-  .argument('<command...>', 'Command to execute')
-  .action((commandParts) => {
-      const fullCommand = commandParts.join(' '); // Join all parts to form the full command
-      interactWithLlama3(fullCommand);
-  });
-
-
-console.log(program);
-
 program.parse(process.argv);
 
-if (!process.argv.slice(2).length) {
-  program.outputHelp();
+// Handle non-specific commandss
+if (!process.argv.slice(2).length || !program.commands.map(cmd => cmd.name()).includes(process.argv[2])) {
+  const commandString = process.argv.slice(2).join(' ');
+  interactWithLlama3(commandString);
 }
-
-export { program, executeGitCommit };
