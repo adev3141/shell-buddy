@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+//Shebang line: #!/usr/bin/env node - This line specifies the path to the Node.js interpreter, 
+//allowing the script to be executed directly from the command line.
 import { program } from 'commander';
 import { execSync } from 'child_process';
 import { promisify } from 'util';
