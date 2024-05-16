@@ -1,24 +1,26 @@
 #!/bin/bash
 # A wrapper script for the ShellBuddy Node.js CLI tool.
-# This script preprocesses command line arguments for special characters and passes them to Node.js.
+# This script reads arguments from the command line, prepares them for processing,
+# and then passes them to the Node.js application.
 
-# Check if debugging is enabled
+# Enable debugging mode if a specific environment variable is set
 if [[ "$SHELLBUDDY_DEBUG" == "1" ]]; then
     set -x  # Print commands and their arguments as they are executed
     echo "Debugging is enabled."
 fi
 
-# Process each argument to escape single quotes and concatenate them
-processed_args=()
-for arg in "$@"; do
-    processed_args+=("$(echo "$arg" | sed "s/'/'\\\\''/g")")
-done
+# Concatenate all arguments into a single string
+input="$*"
 
-# Join all processed arguments into a single string to pass to Node.js
-input="${processed_args[*]}"
+# Debug: show the input
+echo "Original input: '$input'"
 
-# Debug: show processed input
-echo "Processed input: $input"
+# Check for unbalanced single quotes
+if [[ $(( $(tr -cd \' <<< "$*" | wc -c) % 2 )) -ne 0 ]]
+then
+    echo "Error: Unbalanced single quotes in input. Please enclose your entire input in double quotes if you're using single quotes."
+    exit 1
+fi
 
 # Assuming index.js is in the same directory as this script
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
