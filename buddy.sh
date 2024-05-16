@@ -9,22 +9,25 @@ if [[ "$SHELLBUDDY_DEBUG" == "1" ]]; then
     echo "Debugging is enabled."
 fi
 
-# Concatenate all arguments into a single string
-input="$*"
+# Process arguments to handle special characters properly
+input_args=()
+for arg in "$@"; do
+    # Escape single quotes inside the argument
+    safe_arg="${arg//\'/\'\\\'\'}"
+    input_args+=("$safe_arg")
+done
+
+# Join all arguments into a single string with escaped single quotes
+input="${input_args[*]}"
 
 # Debug: show the input
-echo "Original input: '$input'"
+echo "Processed input: $input"
 
-# Check for unbalanced single quotes
-if [[ $(( $(tr -cd \' <<< "$*" | wc -c) % 2 )) -ne 0 ]]
-then
-    echo "Error: Unbalanced single quotes in input. Please enclose your entire input in double quotes if you're using single quotes."
-    exit 1
-fi
+# Find the directory of this script, which is assumed to be in the same directory as the Node.js project
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Assuming index.js is in the same directory as this script
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-node "$DIR/index.js" "$input"
+node "$SCRIPT_DIR/index.js" "$input"
 
 # Disable debugging if it was enabled
 if [[ "$SHELLBUDDY_DEBUG" == "1" ]]; then
