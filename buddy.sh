@@ -1,34 +1,30 @@
 #!/bin/bash
 # A wrapper script for the ShellBuddy Node.js CLI tool.
-# This script reads arguments from the command line, prepares them for processing,
-# and then passes them to the Node.js application.
+# This script preprocesses command line arguments for special characters and passes them to Node.js.
 
-# Enable debugging mode if a specific environment variable is set
+# Check if debugging is enabled
 if [[ "$SHELLBUDDY_DEBUG" == "1" ]]; then
     set -x  # Print commands and their arguments as they are executed
     echo "Debugging is enabled."
 fi
 
-# Get all command line arguments as a single string
-input="$*"
+# Process each argument to escape single quotes and concatenate them
+processed_args=()
+for arg in "$@"; do
+    processed_args+=("$(echo "$arg" | sed "s/'/'\\\\''/g")")
+done
 
-# Optional: Display the raw input for debugging purposes
-echo "Original input: '$input'"
+# Join all processed arguments into a single string to pass to Node.js
+input="${processed_args[*]}"
 
-# Optional: Perform any needed sanitization on the input here
-# For example, escaping specific characters (not usually needed for passing to Node.js)
-# This is a placeholder for potential input modification
-sanitized_input=$(echo "$input" | sed 's/[&;]/\\&/g')
+# Debug: show processed input
+echo "Processed input: $input"
 
-# Display the sanitized input for debugging purposes
-echo "Sanitized input: '$sanitized_input'"
+# Assuming index.js is in the same directory as this script
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+node "$DIR/index.js" "$input"
 
-# Pass the input arguments to the Node.js application
-# Assuming the Node.js script is named 'buddy.js' and located in the same directory as this script
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-node "$DIR/buddy.js" "$sanitized_input"
-
-# Disable debugging explicitly if it was enabled
+# Disable debugging if it was enabled
 if [[ "$SHELLBUDDY_DEBUG" == "1" ]]; then
     set +x
     echo "Debugging is disabled."
