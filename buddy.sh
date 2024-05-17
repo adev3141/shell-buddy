@@ -24,10 +24,10 @@ input="${input_args[*]}"
 echo "Processed input: $input"
 
 # Find the directory of this script, which is assumed to be in the same directory as the Node.js project
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 
 # Assuming index.js is in the same directory as this script
-node "$SCRIPT_DIR/index.js" "$input"
+node "$SCRIPT_DIR/index.js" ${input_args[@]}
 
 # Disable debugging if it was enabled
 if [[ "$SHELLBUDDY_DEBUG" == "1" ]]; then
