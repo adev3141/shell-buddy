@@ -27,7 +27,8 @@ echo "Processed input: $input"
 SCRIPT_DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 
 # Assuming index.js is in the same directory as this script
-node "$SCRIPT_DIR/index.js" ${input_args[@]}
+# Continue using your current approach but ensure all args are passed correctly
+node "$SCRIPT_DIR/index.js" "${input_args[@]}"
 
 # Disable debugging if it was enabled
 if [[ "$SHELLBUDDY_DEBUG" == "1" ]]; then

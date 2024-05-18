@@ -79,20 +79,15 @@ program.command('help')
     program.outputHelp();
   });
 
-// First parse to recognize registered commands
-program.parse(process.argv, { from: 'user' });
+program.parse(process.argv);
 
-// Check if the given command is recognized
+// Handle non-specific commands
 const knownCommands = program.commands.map(cmd => cmd.name());
-const userCommand = process.argv[2];  // The first argument is expected to be the command
+console.log('Parsed Commands:', knownCommands);
+console.log('Received Arguments:', process.argv);
 
-  console.log('Known Commands:', knownCommands);
-  console.log('Received Command:', userCommand);
-
-if (!knownCommands.includes(userCommand)) {
-    // Handle unrecognized command
-    const commandString = process.argv.slice(2).join(' ');
-    interactWithLlama3(commandString);
-}
-
+if (!process.argv.slice(2).length || !knownCommands.includes(process.argv[2])) {
+   const commandString = process.argv.slice(2).join(' ');
+   interactWithLlama3(commandString);
+ }
   
