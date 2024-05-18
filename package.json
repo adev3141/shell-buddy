@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "bin": {
-    "buddy": "./buddy.sh"
+    "buddy": "./index.js"
   },
   "scripts": {
     "test": "jest",
