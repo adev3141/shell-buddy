@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-//Shebang line: #!/usr/bin/env node - This line specifies the path to the Node.js interpreter, 
-//allowing the script to be executed directly from the command line.
+// Shebang line: #!/usr/bin/env node - This line specifies the path to the Node.js interpreter,
+// allowing the script to be executed directly from the command line.
 
 import { program } from 'commander';
 import { execSync } from 'child_process';
@@ -79,15 +79,15 @@ program.command('help')
     program.outputHelp();
   });
 
+// Handle unknown commands
+program.on('command:*', (operands) => {
+  const commandString = operands.join(' ');
+  interactWithLlama3(commandString);
+});
+
 program.parse(process.argv);
 
-// Handle non-specific commands
-const knownCommands = program.commands.map(cmd => cmd.name());
-console.log('Parsed Commands:', knownCommands);
-console.log('Received Arguments:', process.argv);
-
-if (!process.argv.slice(2).length || !knownCommands.includes(process.argv[2])) {
-   const commandString = process.argv.slice(2).join(' ');
-   interactWithLlama3(commandString);
- }
-  
+// Handle no command
+if (!process.argv.slice(2).length) {
+  program.outputHelp();
+}
