@@ -9,29 +9,33 @@ if [[ "$SHELLBUDDY_DEBUG" == "1" ]]; then
     echo "Debugging is enabled."
 fi
 
-# Process arguments to handle special characters properly
+# Initialize an empty array to store processed arguments
 input_args=()
 for arg in "$@"; do
-    # Escape single quotes inside the argument
+    # For each argument, escape single quotes inside the argument
+    # This substitution replaces each single quote (') with an escaped version (\'')
     safe_arg="${arg//\'/\'\\\'\'}"
+    # Add the safely escaped argument to the input_args array
     input_args+=("$safe_arg")
 done
 
-# Join all arguments into a single string with escaped single quotes
+# Combine all arguments into a single string with spaces between them
+# This step is useful for debugging and logging purposes
 input="${input_args[*]}"
 
-# Debug: show the input
+# Print the processed input for debugging purposes
 echo "Processed input: $input"
 
-# Find the directory of this script, which is assumed to be in the same directory as the Node.js project
+# Determine the directory in which this script is located
+# The script assumes it is in the same directory as the Node.js project
 SCRIPT_DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 
-# Assuming index.js is in the same directory as this script
-# Continue using your current approach but ensure all args are passed correctly
+# Execute the Node.js script (index.js) located in the same directory as this script
+# Pass all processed arguments to the Node.js script
 node "$SCRIPT_DIR/index.js" "${input_args[@]}"
 
-# Disable debugging if it was enabled
+# If debugging was enabled, disable it now
 if [[ "$SHELLBUDDY_DEBUG" == "1" ]]; then
-    set +x
+    set +x  # Disable debugging mode
     echo "Debugging is disabled."
 fi
