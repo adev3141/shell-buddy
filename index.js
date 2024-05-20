@@ -5,9 +5,9 @@
 import { program } from 'commander';
 import { execSync } from 'child_process';
 import ollama from 'ollama';
-import { LangChain } from 'langchain';
-import { AutoModelForSeq2SeqLM, AutoTokenizer } from '@xenova/transformers';
-
+import { pipeline } from '@xenova/transformers';
+import fs from 'fs';
+import path from 'path';
 
 async function initPipeline() {
   const pipe = await pipeline('text2text-generation', 'Salesforce/codegen-350M-mono');
