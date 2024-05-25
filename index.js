@@ -5,53 +5,6 @@
 import { program } from 'commander';
 import { execSync } from 'child_process';
 import ollama from 'ollama';
-import { pipeline } from '@xenova/transformers';
-import fs from 'fs';
-import path from 'path';
-
-async function initPipeline() {
-  const pipe = await pipeline('text2text-generation', 'Salesforce/codegen-350M-mono');
-  return pipe;
-}
-
-// Function to add comments to the file
-async function addCommentsToFile(filePath, pipe) {
-  const code = fs.readFileSync(filePath, 'utf-8');
-  const lines = code.split('\n');
-  
-  let commentedCode = '';
-
-  for (const line of lines) {
-    if (line.trim()) {
-      const output = await pipe(line);
-      const comment = output[0].generated_text.trim();
-      if (comment) {
-        commentedCode += `// ${comment}\n${line}\n`;
-      } else {
-        commentedCode += `${line}\n`;
-      }
-    } else {
-      commentedCode += `${line}\n`;
-    }
-  }
-
-  fs.writeFileSync(filePath, commentedCode, 'utf-8');
-}
-
-// Define the document command
-program
-  .command('document <file>')
-  .description('Add comments to a code file')
-  .action(async (file) => {
-    const filePath = path.resolve(file);
-    if (fs.existsSync(filePath)) {
-      const pipe = await initPipeline();
-      await addCommentsToFile(filePath, pipe);
-      console.log(`Comments added to ${file}`);
-    } else {
-      console.error(`File not found: ${filePath}`);
-    }
-  });
 
 program
   .name("shellbuddy")
