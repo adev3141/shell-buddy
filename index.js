@@ -64,11 +64,17 @@ program
       try {
         const result = execSync(command, { stdio: 'pipe', encoding: 'utf-8' });
         console.log(`Command executed successfully: ${command}`);
-        console.log(`Output: ${result.trim()}`);
+        if (result.trim()) {
+          console.log(`Output: ${result.trim()}`);
+        } else {
+          console.log('No output generated.');
+        }
       } catch (error) {
         console.error(`Error executing command: ${command}`);
         console.error(`Error message: ${error.message}`);
-        console.error(`Standard Error: ${error.stderr?.trim()}`);
+        if (error.stderr) {
+          console.error(`Standard Error: ${error.stderr.trim()}`);
+        }
       }
     });
   }
