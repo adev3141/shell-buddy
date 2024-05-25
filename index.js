@@ -58,17 +58,20 @@ program
   .description("CLI tool to provide git commands for common operations")
   .version("1.0.0-beta.1");
 
-function executeGitCommit(commands) {
-  commands.forEach(command => {
-    console.log(`Executing: ${command}`);
-    try {
-      const result = execSync(command, { stdio: 'pipe', encoding: 'utf-8' });
-      console.log(result);
-    } catch (error) {
-      console.error(`Error executing command '${error.cmd}': ${error.message}`);
-    }
-  });
-}
+  function executeGitCommit(commands) {
+    commands.forEach(command => {
+      console.log(`Executing command: ${command}`);
+      try {
+        const result = execSync(command, { stdio: 'pipe', encoding: 'utf-8' });
+        console.log(`Command executed successfully: ${command}`);
+        console.log(`Output: ${result.trim()}`);
+      } catch (error) {
+        console.error(`Error executing command: ${command}`);
+        console.error(`Error message: ${error.message}`);
+        console.error(`Standard Error: ${error.stderr?.trim()}`);
+      }
+    });
+  }
 
 async function interactWithLlama3(prompt) {
   console.log(`Sending prompt to Llama model: ${prompt}`);
