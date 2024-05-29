@@ -52,10 +52,11 @@ async function interactWithLlama3(prompt) {
 }
 
 program
-  .command('commit <message>')
+  .command('commit <message...>')
   .description("Commit changes with a message")
   .option('-t, --tag [tag]', 'Optional tag name')
-  .action((message, options) => {
+  .action((messageParts, options) => {
+    const message = messageParts.join(' ')
     const commands = [
       "git add .",
       `git commit -m "${message}"`
