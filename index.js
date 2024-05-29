@@ -51,7 +51,7 @@ async function interactWithLlama3(prompt) {
   }
 }
 
-program
+  program
   .command('commit <message...>')
   .description("Commit changes with a message")
   .option('-t, --tag [tag]', 'Optional tag name')
@@ -72,16 +72,20 @@ program
     executeGitCommit(commands);
   });
 
-program.command('display')
+  program
+  .command('display')
   .description('Display all available commands')
   .action(() => {
     console.log('Available Commands:');
     console.log('- systemstats');
-    console.log('- commit <message...>');
+    console.log('- commit <message...> [options]');
+    console.log('  Options:');
+    console.log('    -t, --tag [tag]  Optional tag name');
+    console.log('- show last commit');
     console.log('- help');
   });
 
-program.command('systemstats')
+  program.command('systemstats')
   .description("Run htop to view system statistics")
   .action(() => {
     console.log("buddy running htop...");
@@ -92,14 +96,37 @@ program.command('systemstats')
     }
   });
 
-program.command('help')
+  program
+  .command('show last commit')
+  .description('Show details of the last commit')
+  .action(() => {
+    try {
+      const commitDetails = execSync('git log -1 --pretty=format:"%h - %an, %ar : %s"', { encoding: 'utf-8' }).trim();
+      const commitTags = execSync('git tag --contains HEAD', { encoding: 'utf-8' }).trim();
+      const commitFiles = execSync('git show --name-only --oneline HEAD', { encoding: 'utf-8' }).split('\n').slice(1).join('\n').trim();
+
+      console.log('Last Commit Details:');
+      console.log(commitDetails);
+      if (commitTags) {
+        console.log(`Tags: ${commitTags}`);
+      }
+      if (commitFiles) {
+        console.log('Files changed:');
+        console.log(commitFiles);
+      }
+    } catch (error) {
+      console.error('Error fetching commit details:', error.message);
+    }
+  });
+
+  program.command('help')
   .description('Display help for using ShellBuddy')
   .action(() => {
     program.outputHelp();
   });
 
 // Handle unknown commands
-program.on('command:*', (operands) => {
+  program.on('command:*', (operands) => {
   const commandString = operands.join(' ');
   interactWithLlama3(commandString);
 });
