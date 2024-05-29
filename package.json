@@ -1,6 +1,6 @@
 {
   "name": "shellbuddy",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.3-beta.1",
   "description": "A convenient command-line tool for simplifying shell operations with enhanced debugging features",
   "main": "index.js",
   "type": "module",
