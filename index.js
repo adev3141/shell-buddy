@@ -31,6 +31,7 @@ program
       }
     });
   }
+  
 
 async function interactWithLlama3(prompt) {
   console.log(`Sending prompt to Llama model: ${prompt}`);
@@ -50,15 +51,23 @@ async function interactWithLlama3(prompt) {
   }
 }
 
-program.command('commit <message...>')
+program
+  .command('commit <message>')
   .description("Commit changes with a message")
-  .action((messageParts) => {
-    const commitMessage = messageParts.join(' '); 
+  .option('-t, --tag [tag]', 'Optional tag name')
+  .action((message, options) => {
     const commands = [
       "git add .",
-      `git commit -m "${commitMessage}"`,
-      "git push"
+      `git commit -m "${message}"`
     ];
+
+    if (options.tag) {
+      commands.push(`git tag ${options.tag}`);
+      commands.push("git push --follow-tags");
+    } else {
+      commands.push("git push");
+    }
+
     executeGitCommit(commands);
   });
 
