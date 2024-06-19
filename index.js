@@ -83,8 +83,6 @@ virtualenv
     }
   });
 
-
-
 async function interactWithLlama3(prompt) {
   console.log(`Sending prompt to Llama model: ${prompt}`);
   try {
@@ -136,6 +134,7 @@ async function interactWithLlama3(prompt) {
     console.log('- history [number]');
     console.log('- show last commit');
     console.log('- help');
+    console.log('- virtualenv open/close');
   });
 
   program.command('systemstats')
