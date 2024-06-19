@@ -118,7 +118,7 @@ async function interactWithLlama3(prompt) {
     console.log('- show last commit');
     console.log('- help');
   });
-  
+
   program.command('systemstats')
   .description("Run htop to view system statistics")
   .action(() => {
@@ -131,27 +131,25 @@ async function interactWithLlama3(prompt) {
   });
 
   program
-  .command('show last commit')
-  .description('Show details of the last commit')
-  .action(() => {
+  .command('history [number]')
+  .description('Show details of the last [number] commits')
+  .action((number) => {
+    const commitCount = number || 1;
     try {
-      const commitDetails = execSync('git log -1 --pretty=format:"%h - %an, %ar : %s"', { encoding: 'utf-8' }).trim();
-      const commitTags = execSync('git tag --contains HEAD', { encoding: 'utf-8' }).trim();
-      const commitFiles = execSync('git show --name-only --oneline HEAD', { encoding: 'utf-8' }).split('\n').slice(1).join('\n').trim();
+      const commitDetails = execSync(`git log -${commitCount} --pretty=format:"%h - %an, %ar : %s"`, { encoding: 'utf-8' }).trim();
+      const commitFiles = execSync(`git log -${commitCount} --name-only --oneline`, { encoding: 'utf-8' });
 
-      console.log('Last Commit Details:');
+      console.log('Commit History:');
       console.log(commitDetails);
-      if (commitTags) {
-        console.log(`Tags: ${commitTags}`);
-      }
       if (commitFiles) {
         console.log('Files changed:');
-        console.log(commitFiles);
+        console.log(commitFiles.split('\n').slice(1).join('\n').trim());
       }
     } catch (error) {
-      console.error('Error fetching commit details:', error.message);
+      console.error('Error fetching commit history:', error.message);
     }
   });
+
 
   program.command('help')
   .description('Display help for using ShellBuddy')
