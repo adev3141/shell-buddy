@@ -78,7 +78,7 @@ function activateVirtualEnv(venvDir) {
   });
 
   ptyProcess.write(`source ${venvDir}/bin/activate\n`);
-  ptyProcess.write(`clear\n`);
+  ptyProcess.write(`exec $SHELL\n`);  // Start a new shell with the activated environment
 }
 
 async function interactWithLlama3(prompt) {
