@@ -63,7 +63,21 @@ program
       }
     }
   });
-
+  
+  program
+  .command('virtualenv close')
+  .description('Deactivate the virtual environment')
+  .action(() => {
+    try {
+      console.log('To deactivate the virtual environment, run:');
+      console.log('deactivate');
+    } catch (error) {
+      console.error('Error:', error.message);
+      if (error.stderr) {
+        console.error('Standard Error:', error.stderr.trim());
+      }
+    }
+  });
 
 
 async function interactWithLlama3(prompt) {
