@@ -114,10 +114,11 @@ async function interactWithLlama3(prompt) {
     console.log('- commit <message...> [options]');
     console.log('  Options:');
     console.log('    -t, --tag [tag]  Optional tag name');
+    console.log('- history [number]');
     console.log('- show last commit');
     console.log('- help');
   });
-
+  
   program.command('systemstats')
   .description("Run htop to view system statistics")
   .action(() => {
