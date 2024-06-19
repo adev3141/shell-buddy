@@ -5,6 +5,9 @@
 import { program } from 'commander';
 import { execSync } from 'child_process';
 import ollama from 'ollama';
+import shell from 'shelljs';
+import pty from 'node-pty';
+
 
 program
   .name("shellbuddy")
@@ -32,6 +35,51 @@ program
     });
   }
   
+  program
+  .command('virtualenv open')
+  .description('Create and start a virtual environment')
+  .action(() => {
+    const checkVenvInstalled = 'python3 -m venv --help';
+    const venvDir = 'venv';
+
+    try {
+      console.log('Checking if venv is installed...');
+      execSync(checkVenvInstalled, { stdio: 'pipe' });
+
+      if (shell.test('-d', venvDir)) {
+        console.log('Virtual environment already exists. Activating it...');
+        activateVirtualEnv(venvDir);
+      } else {
+        console.log('Creating a new virtual environment...');
+        shell.exec(`python3 -m venv ${venvDir}`);
+        console.log('Virtual environment created. Activating it...');
+        activateVirtualEnv(venvDir);
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+      if (error.stderr) {
+        console.error('Standard Error:', error.stderr.trim());
+      }
+    }
+  });
+
+function activateVirtualEnv(venvDir) {
+  const shellPath = shell.which('sh') || '/bin/sh';
+  const ptyProcess = pty.spawn(shellPath, [], {
+    name: 'xterm-color',
+    cols: process.stdout.columns,
+    rows: process.stdout.rows,
+    cwd: process.cwd(),
+    env: process.env
+  });
+
+  ptyProcess.on('data', data => {
+    process.stdout.write(data);
+  });
+
+  ptyProcess.write(`source ${venvDir}/bin/activate\n`);
+  ptyProcess.write(`clear\n`);
+}
 
 async function interactWithLlama3(prompt) {
   console.log(`Sending prompt to Llama model: ${prompt}`);
