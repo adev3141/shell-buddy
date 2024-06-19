@@ -35,8 +35,12 @@ program
     });
   }
   
-  program
-  .command('virtualenv open')
+  const virtualenv = program
+  .command('virtualenv')
+  .description('Manage virtual environments');
+
+virtualenv
+  .command('open')
   .description('Create and start a virtual environment')
   .action(() => {
     const checkVenvInstalled = 'python3 -m venv --help';
@@ -63,9 +67,9 @@ program
       }
     }
   });
-  
-  program
-  .command('virtualenv close')
+
+virtualenv
+  .command('close')
   .description('Deactivate the virtual environment')
   .action(() => {
     try {
@@ -78,6 +82,7 @@ program
       }
     }
   });
+
 
 
 async function interactWithLlama3(prompt) {
