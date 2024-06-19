@@ -14,6 +14,17 @@ program
   .description("CLI tool to provide git commands for common operations")
   .version("1.0.0-beta.1");
 
+  function executeCommand(command, description) {
+    console.log(`\n${description}:`);
+    try {
+      const result = execSync(command, { stdio: 'pipe', encoding: 'utf-8' }).trim();
+      console.log(result);
+    } catch (error) {
+      console.error(`Error executing command: ${command}`);
+      console.error(error.message);
+    }
+  }
+
   function executeGitCommit(commands) {
     commands.forEach(command => {
       console.log(`Executing command: ${command}`);
@@ -136,6 +147,52 @@ async function interactWithLlama3(prompt) {
     console.log('- help');
     console.log('- virtualenv open/close');
   });
+
+  program
+  .command('status')
+  .description('Show a comprehensive status of the repository and environment')
+  .action(() => {
+    // Git status
+    executeCommand('git status -s', 'Git Status');
+
+    // Current branch
+    executeCommand('git rev-parse --abbrev-ref HEAD', 'Current Branch');
+
+    // Recent commits
+    executeCommand('git log -5 --pretty=format:"%h - %an, %ar : %s"', 'Recent Commits');
+
+    // Uncommitted changes
+    executeCommand('git diff --name-only', 'Uncommitted Changes (Unstaged)');
+    executeCommand('git diff --cached --name-only', 'Uncommitted Changes (Staged)');
+
+    // Untracked files
+    executeCommand('git ls-files --others --exclude-standard', 'Untracked Files');
+
+    // Stash list
+    executeCommand('git stash list', 'Stash List');
+
+    // Linter results (assuming ESLint is used)
+    console.log('\nLinter Results:');
+    try {
+      const lintResult = execSync('eslint .', { stdio: 'pipe', encoding: 'utf-8' }).trim();
+      console.log(lintResult);
+    } catch (error) {
+      console.error('No linting issues found.');
+    }
+
+    // Test summary (assuming Jest is used)
+    console.log('\nTest Summary:');
+    try {
+      const testResult = execSync('jest --coverage', { stdio: 'pipe', encoding: 'utf-8' }).trim();
+      console.log(testResult);
+    } catch (error) {
+      console.error('Error running tests:', error.message);
+    }
+
+    // Dependency status (assuming npm is used)
+    executeCommand('npm outdated', 'Outdated Dependencies');
+  });
+
 
   program.command('systemstats')
   .description("Run htop to view system statistics")
