@@ -47,14 +47,15 @@ program
       execSync(checkVenvInstalled, { stdio: 'pipe' });
 
       if (shell.test('-d', venvDir)) {
-        console.log('Virtual environment already exists. Activating it...');
-        activateVirtualEnv(venvDir);
+        console.log('Virtual environment already exists.');
       } else {
         console.log('Creating a new virtual environment...');
         shell.exec(`python3 -m venv ${venvDir}`);
-        console.log('Virtual environment created. Activating it...');
-        activateVirtualEnv(venvDir);
+        console.log('Virtual environment created.');
       }
+
+      console.log('To activate the virtual environment, run:');
+      console.log(`source ${venvDir}/bin/activate`);
     } catch (error) {
       console.error('Error:', error.message);
       if (error.stderr) {
@@ -63,23 +64,7 @@ program
     }
   });
 
-function activateVirtualEnv(venvDir) {
-  const shellPath = shell.which('sh') || '/bin/sh';
-  const ptyProcess = pty.spawn(shellPath, [], {
-    name: 'xterm-color',
-    cols: process.stdout.columns,
-    rows: process.stdout.rows,
-    cwd: process.cwd(),
-    env: process.env
-  });
 
-  ptyProcess.on('data', data => {
-    process.stdout.write(data);
-  });
-
-  ptyProcess.write(`source ${venvDir}/bin/activate\n`);
-  ptyProcess.write(`exec ${process.env.SHELL}\n`);
-}
 
 async function interactWithLlama3(prompt) {
   console.log(`Sending prompt to Llama model: ${prompt}`);
