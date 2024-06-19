@@ -7,6 +7,8 @@ import { execSync } from 'child_process';
 import ollama from 'ollama';
 import shell from 'shelljs';
 import pty from 'node-pty';
+import chalk from 'chalk';
+
 
 
 program
@@ -15,13 +17,17 @@ program
   .version("1.0.0-beta.1");
 
   function executeCommand(command, description) {
-    console.log(`\n${description}:`);
+    console.log(chalk.blue(`\n${description}:`));
     try {
       const result = execSync(command, { stdio: 'pipe', encoding: 'utf-8' }).trim();
-      console.log(result);
+      if (result) {
+        console.log(result);
+      } else {
+        console.log(chalk.green('No issues found.'));
+      }
     } catch (error) {
-      console.error(`Error executing command: ${command}`);
-      console.error(error.message);
+      console.error(chalk.red(`Error executing command: ${command}`));
+      console.error(chalk.red(error.message));
     }
   }
 
@@ -172,26 +178,40 @@ async function interactWithLlama3(prompt) {
     executeCommand('git stash list', 'Stash List');
 
     // Linter results (assuming ESLint is used)
-    console.log('\nLinter Results:');
+    console.log(chalk.blue('\nLinter Results:'));
     try {
       const lintResult = execSync('eslint .', { stdio: 'pipe', encoding: 'utf-8' }).trim();
-      console.log(lintResult);
+      console.log(lintResult || chalk.green('No linting issues found.'));
     } catch (error) {
-      console.error('No linting issues found.');
+      console.error(chalk.red('Error running linter:'), chalk.red(error.message));
     }
 
     // Test summary (assuming Jest is used)
-    console.log('\nTest Summary:');
+    console.log(chalk.blue('\nTest Summary:'));
     try {
       const testResult = execSync('jest --coverage', { stdio: 'pipe', encoding: 'utf-8' }).trim();
       console.log(testResult);
     } catch (error) {
-      console.error('Error running tests:', error.message);
+      console.error(chalk.red('Error running tests:'), chalk.red(error.message));
     }
 
     // Dependency status (assuming npm is used)
-    executeCommand('npm outdated', 'Outdated Dependencies');
+    console.log(chalk.blue('\nOutdated Dependencies:'));
+    try {
+      const outdatedResult = execSync('npm outdated', { stdio: 'pipe', encoding: 'utf-8' }).trim();
+      console.log(outdatedResult || chalk.green('All dependencies are up-to-date.'));
+    } catch (error) {
+      console.error(chalk.red('Error checking outdated dependencies:'), chalk.red(error.message));
+    }
+
+    // Suggest actions
+    console.log(chalk.blue('\nSuggested Actions:'));
+    console.log(chalk.yellow('1. Review and commit your changes.'));
+    console.log(chalk.yellow('2. Push your changes to the remote repository.'));
+    console.log(chalk.yellow('3. Resolve any linting or testing issues.'));
+    console.log(chalk.yellow('4. Update outdated dependencies if any.'));
   });
+
 
 
   program.command('systemstats')
