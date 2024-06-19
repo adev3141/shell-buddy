@@ -152,6 +152,7 @@ async function interactWithLlama3(prompt) {
     console.log('- show last commit');
     console.log('- help');
     console.log('- virtualenv open/close');
+    console.log('- buddy status');
   });
 
   program
