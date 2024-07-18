@@ -125,7 +125,7 @@ async function interactWithLlama3(prompt) {
   .action((messageParts, options) => {
     const message = messageParts.join(' ')
     const commands = [
-      "git add .",
+      "git add -A",
       `git commit -m "${message}"`
     ];
 
@@ -212,8 +212,6 @@ async function interactWithLlama3(prompt) {
     console.log(chalk.yellow('3. Resolve any linting or testing issues.'));
     console.log(chalk.yellow('4. Update outdated dependencies if any.'));
   });
-
-
 
   program.command('systemstats')
   .description("Run htop to view system statistics")
