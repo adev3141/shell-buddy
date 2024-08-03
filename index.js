@@ -1,15 +1,19 @@
 #!/usr/bin/env node
 // Shebang line: #!/usr/bin/env node - This line specifies the path to the Node.js interpreter,
 // allowing the script to be executed directly from the command line..
-
+import dotenv from 'dotenv';
+import fs from 'fs/promises';
 import { program } from 'commander';
 import { execSync } from 'child_process';
 import ollama from 'ollama';
 import shell from 'shelljs';
 import pty from 'node-pty';
 import chalk from 'chalk';
+import { GeminiModel } from './GeminiModel.js';
 
+dotenv.config();
 
+const geminiModel = new GeminiModel(process.env.GOOGLE_GEMINI_API_KEY);
 
 program
   .name("shellbuddy")
@@ -154,6 +158,34 @@ async function interactWithLlama3(prompt) {
     console.log('- virtualenv open/close');
     console.log('- buddy status');
   });
+
+  program
+  .command('env')
+  .description('Read the environment and dependencies and provide commands to run the application')
+  .action(async () => {
+    try {
+      // Asynchronously reading package.json to get dependencies and main entry point
+      const packageJsonData = await fs.readFile('package.json', 'utf-8');
+      const packageJson = JSON.parse(packageJsonData);
+      const dependenciesList = Object.keys(packageJson.dependencies).join(', ');
+      const mainFile = packageJson.main;
+
+      // Initialize the Gemini model (if not already initialized)
+      await geminiModel.initializeModel();
+
+      // Prepare the prompt
+      const prompt = `Given the dependencies: ${dependenciesList}, what are the general commands to run an application with these dependencies using the main entry point file ${mainFile}? Please provide accurate and precise commands directly without writing how you've done it in bullet points format: 1. ... ;`;
+
+      // Generate content from the Gemini model
+      const response = await geminiModel.generateContent(prompt);
+
+      // Output the response
+      console.log(response);
+    } catch (error) {
+      console.error('Error reading environment or interacting with the Gemini model:', error.message);
+    }
+  });
+
 
   program
   .command('status')
