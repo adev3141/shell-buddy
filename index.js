@@ -122,25 +122,37 @@ async function interactWithLlama3(prompt) {
   }
 }
 
-  program
-  .command('commit <message...>')
-  .description("Commit changes with a message")
-  .option('-t, --tag [tag]', 'Optional tag name')
-  .action((messageParts, options) => {
-    const message = messageParts.join(' ')
-    const commands = [
-      "git add -A",
-      `git commit -m "${message}"`
-    ];
+program
+.command('commit <message...>')
+.description("Commit changes with a message")
+.option('-t, --tag [tag]', 'Optional tag name')
+.action((messageParts, options) => {
+  const message = messageParts.join(' ');
 
-    if (options.tag) {
-      commands.push(`git tag ${options.tag}`);
-      commands.push("git push --follow-tags");
-    } else {
-      commands.push("git push");
+  try {
+      // Check if there are changes to commit
+      const statusOutput = execSync("git status --porcelain", { stdio: 'pipe', encoding: 'utf-8' });
+
+      if (statusOutput.trim()) {
+        const commands = [
+          "git add -A",
+          `git commit -m "${message}"`
+        ];
+
+        if (options.tag) {
+          commands.push(`git tag ${options.tag}`);
+          commands.push("git push --follow-tags");
+        } else {
+          commands.push("git push");
+        }
+
+        executeGitCommit(commands);
+      } else {
+        console.log("No changes to commit.");
+      }
+    } catch (error) {
+      console.error("Error checking git status:", error.message);
     }
-
-    executeGitCommit(commands);
   });
 
   program
