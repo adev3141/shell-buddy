@@ -1,4 +1,7 @@
+import dotenv from 'dotenv';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+
+dotenv.config();  // Load environment variables from .env file
 
 /**
  * Class to handle interactions with the Google Generative AI Gemini model.
@@ -6,10 +9,11 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 class GeminiModel {
   /**
    * Constructor initializes the Gemini model with API key.
-   * @param {string} GOOGLE_GEMINI_API_KEY - The API key for authenticating with the Gemini API.
+   * @param {string} GEMINI_API_KEY - The API key for authenticating with the Gemini API.
    */
-  constructor(GOOGLE_GEMINI_API_KEY) {
-    this.genAI = new GoogleGenerativeAI({ apiKey: GOOGLE_GEMINI_API_KEY });
+  constructor(GEMINI_API_KEY) {
+    this.apiKey = GEMINI_API_KEY; // Store the API key directly in the class instance
+    this.genAI = new GoogleGenerativeAI( process.env.GEMINI_API_KEY );
     this.model = null;
   }
 
@@ -21,9 +25,9 @@ class GeminiModel {
   async initializeModel() {
     try {
       this.model = await this.genAI.getGenerativeModel({
-        model: 'gemini-1.5-pro',
-        tools: [{ codeExecution: {} }],
+        model: 'gemini-1.5-pro'
       });
+
     } catch (error) {
       console.error('Error initializing Gemini model:', error);
       throw new Error('Failed to initialize the Gemini model.');
@@ -37,18 +41,23 @@ class GeminiModel {
    */
   async generateContent(prompt) {
     if (!this.model) {
-      console.error('Model not initialized. Call initializeModel() first.');
-      return 'Model not initialized.';
+        console.error('Model not initialized. Call initializeModel() first.');
+        return 'Model not initialized.';
     }
 
     try {
-      const result = await this.model.generateContent([{ text: prompt }]);
-      return result.text || 'No response generated.';
-    } catch (error) {
-      console.error('Error interacting with Gemini model:', error);
-      return 'There was an error processing your request.';
-    }
+        const result = await this.model.generateContent(prompt);
+        
+        // Call the text() function to get the generated text
+        const responseText = await result.response.text();
+
+        return responseText || 'No response generated.';
+      } catch (error) {
+        console.error('Error interacting with Gemini model:', error);
+        return 'There was an error processing your request.';
+      }
   }
+
 }
 
 export { GeminiModel };

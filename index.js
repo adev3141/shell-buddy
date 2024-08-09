@@ -7,11 +7,10 @@ import { program } from 'commander';
 import { execSync } from 'child_process';
 import ollama from 'ollama';
 import shell from 'shelljs';
-import pty from 'node-pty';
 import chalk from 'chalk';
 import { GeminiModel } from './GeminiModel.js';
 
-dotenv.config();
+dotenv.config();  // Load environment variables from .env file
 
 const geminiModel = new GeminiModel(process.env.GOOGLE_GEMINI_API_KEY);
 
@@ -296,9 +295,10 @@ program
   });
 
 // Handle unknown commands
-  program.on('command:*', (operands) => {
+  program.on('command:*', async (operands) => {
   const commandString = operands.join(' ');
-  interactWithLlama3(commandString);
+  await geminiModel.initializeModel();
+  geminiModel.generateContent(commandString);
 });
 
 program.parse(process.argv);
