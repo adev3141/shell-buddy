@@ -9,6 +9,9 @@ import ollama from 'ollama';
 import shell from 'shelljs';
 import chalk from 'chalk';
 import { GeminiModel } from './GeminiModel.js';
+import inquirer from 'inquirer';
+import { exec} from 'child_process';
+
 
 dotenv.config();  // Load environment variables from .env file
 
@@ -287,7 +290,6 @@ program
     }
   });
 
-
   program.command('help')
   .description('Display help for using ShellBuddy')
   .action(() => {
@@ -301,9 +303,98 @@ program
   geminiModel.generateContent(commandString);
 });
 
-program.parse(process.argv);
+program
+  .command('how')
+  .description('Display interactive git command menu')
+  .action(() => {
+    const commands = {
+      "how to undo the last commit": "git revert HEAD",
+        "commit": "composite command",
+        "how do i check the status of my repo": "git status",
+        "how can i see recent commits": "git log",
+        "how do i switch to another branch": "git checkout [branch-name]",
+        "how to create a new branch": "git branch [new-branch]",
+        "how do i merge a branch into the current branch": "git merge [branch-name]",
+        "how to discard changes in the working directory": "git checkout -- [file-name]",
+        "how do i add a file to the staging area": "git add [file-name]",
+        "how to commit changes with a message": "git commit -m \"[commit message]\"",
+        "how do i push changes to a remote repository": "git push origin [branch-name]",
+        "how to pull updates from a remote repository": "git pull",
+        "how do i clone a repository": "git clone [repository-url]",
+        "how to view changes since last commit": "git diff",
+        "how do i list all branches": "git branch -a",
+        "how to delete a branch": "git branch -d [branch-name]",
+        "how do i stash my changes": "git stash",
+        "how to apply stashed changes": "git stash pop",
+        "how do i rename a branch": "git branch -m [new-branch-name]",
+        "how to show the commit history as a graph": "git log --graph",
+        "how do i see changes in a particular file": "git log -p [file-name]",
+        "how to create a tag for a commit": "git tag [tag-name] [commit-hash]",
+        "how do i fetch updates from a remote but not merge": "git fetch origin",
+        "how to rebase the current branch": "git rebase [base-branch-name]",
+        "how do i resolve merge conflicts": "Manual process, then git add [resolved-file], and git commit",
+        "how to show remote repositories": "git remote -v",
+        "how do i add a remote repository": "git remote add [name] [url]",
+        "how to remove a remote repository": "git remote remove [name]",
+        "how do i show changes made by a specific commit": "git show [commit-hash]",
+        "how to reset to a specific commit": "git reset [commit-hash]",
+        "how do i update my fork with changes from the original repository": "git fetch upstream; git merge upstream/[branch-name]",
+        "how to see who changed what and when in a file": "git blame [file-name]",
+        "how do i list all the files that have been modified": "git ls-files -m",
+        "how to compare two branches": "git diff [branch1]..[branch2]",
+        "how do i continue rebase after resolving conflicts": "git rebase --continue",
+        "how to abort a rebase": "git rebase --abort",
+        "how do i set a new remote URL": "git remote set-url origin [new-url]",
+        "how to create and checkout a new branch simultaneously": "git checkout -b [new-branch]",
+        "how do i show the history of a specific file": "git log -- [file-name]",
+        "how to include a subproject in the repository": "git submodule add [url] [path]",
+        "how do i initialize a new git repository": "git init",
+        "how to make git ignore certain files": "Create a .gitignore file",
+        "how do i change the message of my last commit": "git commit --amend -m \"[new message]\"",
+        "how to show the stash list": "git stash list",
+        "how do i remove files from the staging area": "git reset HEAD [file-name]",
+        "how to cherry-pick a commit to the current branch": "git cherry-pick [commit-hash]",
+        "how do i find a commit where a bug was introduced": "git bisect start; git bisect bad; git bisect good [commit-hash]",
+        "how to create a patch from a commit": "git format-patch -1 [commit-hash]",
+        "how do i apply a patch file": "git apply [patch-file]",
+        "how to show a list of all ignored files": "git ls-files --others --ignored --exclude-standard",
+        "how do i find out the current branch": "git branch --show-current"
+    };
+
+    const choices = Object.keys(commands);
+
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'command',
+          message: 'Select a command:',
+          choices: choices
+        }
+      ])
+      .then(answers => {
+        const selectedCommand = commands[answers.command];
+        console.log(`You selected: ${answers.command}`);
+        console.log(`Running: ${selectedCommand}`);
+        
+        exec(selectedCommand, (error, stdout, stderr) => {
+          if (error) {
+            console.error(`Error: ${error.message}`);
+            return;
+          }
+          if (stderr) {
+            console.error(`stderr: ${stderr}`);
+            return;
+          }
+          console.log(`stdout: ${stdout}`);
+        });
+      });
+  });
+
+
 
 // Handle no command
 if (!process.argv.slice(2).length) {
   program.outputHelp();
 }
+program.parse(process.argv);
