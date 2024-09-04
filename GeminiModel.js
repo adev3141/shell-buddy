@@ -12,7 +12,7 @@ class GeminiModel {
    * @param {string} GEMINI_API_KEY - The API key for authenticating with the Gemini API.
    */
   constructor(GEMINI_API_KEY = process.env.GEMINI_API_KEY) {
-    this.apiKey = GEMINI_API_KEY; // Store the API key directly in the class instance
+    this.apiKey = "AIzaSyCa6iuUIeG1P48HZP6LzWNA84Wq4F3gSAc"; // Store the API key directly in the class instance
     this.genAI = new GoogleGenerativeAI(this.apiKey);
     this.model = null;
   }
