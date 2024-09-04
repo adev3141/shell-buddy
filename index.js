@@ -296,13 +296,6 @@ program
     program.outputHelp();
   });
 
-// Handle unknown commands
-  program.on('command:*', async (operands) => {
-  const commandString = operands.join(' ');
-  await geminiModel.initializeModel();
-  geminiModel.generateContent(commandString);
-});
-
 program
   .command('how')
   .description('Display interactive git command menu')
@@ -391,7 +384,20 @@ program
       });
   });
 
-
+  program.on('command:*', async (operands) => {
+    const commandString = operands.join(' ');
+    console.log(`AI Help: ${commandString}`);
+    
+    // Example of generating content based on the concatenated string
+    try {
+      await geminiModel.initializeModel();
+      const response = await geminiModel.generateContent(commandString);
+      console.log(response);
+    } catch (error) {
+      console.error('An error occurred:', error);
+    }
+  });
+  
 
 // Handle no command
 if (!process.argv.slice(2).length) {
