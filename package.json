@@ -1,6 +1,6 @@
 {
   "name": "shellbuddy",
-  "version": "1.0.3-beta.1",
+  "version": "2.0.1.release.1",
   "description": "A convenient command-line tool for automating shell commands like git commits, systemstats, git tags and more to come",
   "main": "index.js",
   "type": "module",
