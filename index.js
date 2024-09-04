@@ -385,10 +385,7 @@ program
   });
 
   program.on('command:*', async (operands) => {
-    const commandString = operands.join(' ');
-    console.log(`AI Help: ${commandString}`);
-    
-    // Example of generating content based on the concatenated string
+    const commandString = operands.join(' ');    
     try {
       await geminiModel.initializeModel();
       const response = await geminiModel.generateContent(commandString);
