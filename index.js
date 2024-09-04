@@ -391,7 +391,7 @@ program
       const response = await geminiModel.generateContent(commandString);
       console.log(response);
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error('An error occurred with the request:', error);
     }
   });
   
