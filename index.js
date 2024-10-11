@@ -38,7 +38,8 @@ program
   }
 
   function executeGitCommit(commands) {
-    commands.forEach(command => {
+    for (let i = 0; i < commands.length; i++) {
+      const command = commands[i];
       console.log(`Executing command: ${command}`);
       try {
         const result = execSync(command, { stdio: 'pipe', encoding: 'utf-8' });
@@ -49,14 +50,15 @@ program
           console.log('No output generated.');
         }
       } catch (error) {
-        console.error(`Error executing command: ${command}`);
-        console.error(`Error message: ${error.message}`);
         if (error.stderr) {
-          console.error(`Standard Error: ${error.stderr.trim()}`);
+          console.error(`Standard: ${error.stderr.trim()}`);
         }
+        return false; // Stop executing further commands if an error occurs
       }
-    });
+    }
+    return true; // All commands executed successfully
   }
+  
   
   const virtualenv = program
   .command('virtualenv')
@@ -106,24 +108,7 @@ virtualenv
     }
   });
 
-async function interactWithLlama3(prompt) {
-  console.log(`Sending prompt to Llama model: ${prompt}`);
-  try {
-    const response = await ollama.chat({
-      model: 'llama3',
-      messages: [{ role: 'user', content: prompt }],
-    });
-    console.log('Response received:', response);
-    if (response.message) {
-      console.log(response.message.content);
-    } else {
-      console.log('No message found in the response.');
-    }
-  } catch (error) {
-    console.error('An error occurred:', error);
-  }
-}
-
+//commit command
 program
 .command('commit <message...>')
 .description("Commit changes with a message")
@@ -148,8 +133,10 @@ program
           commands.push("git push");
         }
 
-        executeGitCommit(commands);
-      } else {
+        const allCommandsExecuted = executeGitCommit(commands);
+        if (!allCommandsExecuted) {
+          console.error("Execution stopped due to an error.");
+        }      } else {
         console.log("No changes to commit.");
       }
     } catch (error) {
