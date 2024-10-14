@@ -108,6 +108,94 @@ virtualenv
     }
   });
 
+//build command
+program
+  .command('build')
+  .description("Build the project based on the environment (dotnet, node, react)")
+  .action(() => {
+    const currentDir = process.cwd();
+
+    // Check for dotnet projects
+    const dotnetFiles = findFilesByExtension(currentDir, '.csproj');
+    if (dotnetFiles.length === 1) {
+      console.log(`Building .NET project: ${dotnetFiles[0]}`);
+      executeBuildCommand(`dotnet build ${dotnetFiles[0]}`);
+    } else if (dotnetFiles.length > 1) {
+      console.log("There is more than 1 project file. The potential executables for building are:");
+      dotnetFiles.forEach(file => console.log(file));
+    } else {
+      // Check for Node.js and React projects (using package.json)
+      const nodeProjects = findFilesByName(currentDir, 'package.json');
+      if (nodeProjects.length === 1) {
+        const packageJsonPath = nodeProjects[0];
+        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+
+        // Check if it's a React project (presence of react-scripts)
+        if (packageJson.dependencies && packageJson.dependencies['react-scripts']) {
+          console.log('Building React project...');
+          executeBuildCommand('npm run build');
+        } else {
+          // Otherwise, assume it's a Node.js project
+          console.log('Building Node.js project...');
+          executeBuildCommand('npm run build'); // Fallback to npm run build for Node.js
+        }
+      } else if (nodeProjects.length > 1) {
+        console.log("There is more than 1 project file. The potential executables for building are:");
+        nodeProjects.forEach(file => console.log(file));
+      } else {
+        console.log("No project files found to build.");
+      }
+    }
+  });
+
+// Helper functions
+
+function findFilesByExtension(dir, extension) {
+  let results = [];
+  const files = fs.readdirSync(dir);
+
+  files.forEach(file => {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
+
+    if (stat.isDirectory()) {
+      results = results.concat(findFilesByExtension(filePath, extension));
+    } else if (file.endsWith(extension)) {
+      results.push(filePath);
+    }
+  });
+
+  return results;
+}
+
+function findFilesByName(dir, filename) {
+  let results = [];
+  const files = fs.readdirSync(dir);
+
+  files.forEach(file => {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
+
+    if (stat.isDirectory()) {
+      results = results.concat(findFilesByName(filePath, filename));
+    } else if (file === filename) {
+      results.push(filePath);
+    }
+  });
+
+  return results;
+}
+
+function executeBuildCommand(command) {
+  try {
+    const result = execSync(command, { stdio: 'inherit' });
+    console.log(result.toString());
+  } catch (error) {
+    console.error(`Error executing command: ${command}`);
+    console.error(error.message);
+  }
+}
+
 //commit command
 program
 .command('commit <message...>')
