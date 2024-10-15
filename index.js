@@ -5,12 +5,13 @@ import dotenv from 'dotenv';
 import fs from 'fs/promises';
 import { program } from 'commander';
 import { execSync } from 'child_process';
-import ollama from 'ollama';
 import shell from 'shelljs';
 import chalk from 'chalk';
 import { GeminiModel } from './GeminiModel.js';
 import inquirer from 'inquirer';
 import { exec} from 'child_process';
+import path from 'path'; // <-- Make sure to import the path module
+
 
 
 dotenv.config();  // Load environment variables from .env file
@@ -108,27 +109,29 @@ virtualenv
     }
   });
 
-//build command
-program
+  program
   .command('build')
   .description("Build the project based on the environment (dotnet, node, react)")
-  .action(() => {
+  .action(async () => {
     const currentDir = process.cwd();
 
-    // Check for dotnet projects
-    const dotnetFiles = findFilesByExtension(currentDir, '.csproj');
-    if (dotnetFiles.length === 1) {
-      console.log(`Building .NET project: ${dotnetFiles[0]}`);
-      executeBuildCommand(`dotnet build ${dotnetFiles[0]}`);
-    } else if (dotnetFiles.length > 1) {
-      console.log("There is more than 1 project file. The potential executables for building are:");
-      dotnetFiles.forEach(file => console.log(file));
-    } else {
+    // Check for dotnet solution (.sln) files
+    const dotnetSolutionFiles = await findFilesByExtension(currentDir, '.sln');
+    if (dotnetSolutionFiles.length === 1) {
+      console.log(`Building .NET solution: ${dotnetSolutionFiles[0]}`);
+      executeBuildCommand(`dotnet build ${dotnetSolutionFiles[0]}`);
+      return;
+    } else if (dotnetSolutionFiles.length > 1) {
+      console.log("There is more than 1 solution file. The potential executables for building are:");
+      dotnetSolutionFiles.forEach(file => console.log(file));
+      return;
+    }
+    else {
       // Check for Node.js and React projects (using package.json)
-      const nodeProjects = findFilesByName(currentDir, 'package.json');
+      const nodeProjects = await findFilesByName(currentDir, 'package.json');
       if (nodeProjects.length === 1) {
         const packageJsonPath = nodeProjects[0];
-        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
 
         // Check if it's a React project (presence of react-scripts)
         if (packageJson.dependencies && packageJson.dependencies['react-scripts']) {
@@ -150,38 +153,38 @@ program
 
 // Helper functions
 
-function findFilesByExtension(dir, extension) {
+async function findFilesByExtension(dir, extension) {
   let results = [];
-  const files = fs.readdirSync(dir);
+  const files = await fs.readdir(dir);  // Ensure you're awaiting this
 
-  files.forEach(file => {
+  for (const file of files) {
     const filePath = path.join(dir, file);
-    const stat = fs.statSync(filePath);
+    const stat = await fs.stat(filePath);  // Ensure you're awaiting this
 
     if (stat.isDirectory()) {
-      results = results.concat(findFilesByExtension(filePath, extension));
+      results = results.concat(await findFilesByExtension(filePath, extension));
     } else if (file.endsWith(extension)) {
       results.push(filePath);
     }
-  });
+  }
 
   return results;
 }
 
-function findFilesByName(dir, filename) {
+async function findFilesByName(dir, filename) {
   let results = [];
-  const files = fs.readdirSync(dir);
+  const files = await fs.readdir(dir);  // Ensure you're awaiting this
 
-  files.forEach(file => {
+  for (const file of files) {
     const filePath = path.join(dir, file);
-    const stat = fs.statSync(filePath);
+    const stat = await fs.stat(filePath);  // Ensure you're awaiting this
 
     if (stat.isDirectory()) {
-      results = results.concat(findFilesByName(filePath, filename));
+      results = results.concat(await findFilesByName(filePath, filename));
     } else if (file === filename) {
       results.push(filePath);
     }
-  });
+  }
 
   return results;
 }
@@ -195,6 +198,7 @@ function executeBuildCommand(command) {
     console.error(error.message);
   }
 }
+
 
 //commit command
 program
