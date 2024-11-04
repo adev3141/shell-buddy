@@ -202,13 +202,13 @@ function executeBuildCommand(command) {
 
 //commit command
 program
-.command('commit <message...>')
-.description("Commit changes with a message")
-.option('-t, --tag [tag]', 'Optional tag name')
-.action((messageParts, options) => {
-  const message = messageParts.join(' ');
+  .command('commit <message...>')
+  .description("Commit changes with a message")
+  .option('-t, --tag [tag]', 'Optional tag name')
+  .action((messageParts, options) => {
+    const message = messageParts.join(' ');
 
-  try {
+    try {
       // Check if there are changes to commit
       const statusOutput = execSync("git status --porcelain", { stdio: 'pipe', encoding: 'utf-8' });
 
@@ -220,15 +220,17 @@ program
 
         if (options.tag) {
           commands.push(`git tag ${options.tag}`);
-          commands.push("git push --follow-tags");
-        } else {
-          commands.push("git push");
         }
+
+        // Push changes and tags explicitly
+        commands.push("git push");
+        commands.push("git push --tags");
 
         const allCommandsExecuted = executeGitCommit(commands);
         if (!allCommandsExecuted) {
           console.error("Execution stopped due to an error.");
-        }      } else {
+        }
+      } else {
         console.log("No changes to commit.");
       }
     } catch (error) {
