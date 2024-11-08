@@ -215,16 +215,14 @@ program
       if (statusOutput.trim()) {
         const commands = [
           "git add -A",
-          `git commit -m "${message}"`
+          `git commit -m "${message}"`,
+          "git push"
         ];
 
         if (options.tag) {
           commands.push(`git tag ${options.tag}`);
+          commands.push("git push --tags");
         }
-
-        // Push changes and tags explicitly
-        commands.push("git push");
-        commands.push("git push --tags");
 
         const allCommandsExecuted = executeGitCommit(commands);
         if (!allCommandsExecuted) {
