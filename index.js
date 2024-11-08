@@ -200,7 +200,7 @@ function executeBuildCommand(command) {
 }
 
 
-//commit command
+//commit command.
 program
   .command('commit <message...>')
   .description("Commit changes with a message")
