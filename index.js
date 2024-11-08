@@ -115,54 +115,165 @@ virtualenv
   .action(async () => {
     const currentDir = process.cwd();
 
-    // Check for dotnet solution (.sln) files
-    const dotnetSolutionFiles = await findFilesByExtension(currentDir, '.sln');
-    if (dotnetSolutionFiles.length === 1) {
-      console.log(`Building .NET solution: ${dotnetSolutionFiles[0]}`);
-      executeBuildCommand(`dotnet build ${dotnetSolutionFiles[0]}`);
-      return;
-    } else if (dotnetSolutionFiles.length > 1) {
-      console.log("There is more than 1 solution file. The potential executables for building are:");
-      dotnetSolutionFiles.forEach(file => console.log(file));
-      return;
-    }
-    else {
-      // Check for Node.js and React projects (using package.json)
-      const nodeProjects = await findFilesByName(currentDir, 'package.json');
-      if (nodeProjects.length === 1) {
-        const packageJsonPath = nodeProjects[0];
-        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    try {
+      // Check for .NET solution (.sln) files
+      const dotnetSolutionFiles = await findFilesByExtension(currentDir, '.sln');
+      if (dotnetSolutionFiles.length === 1) {
+        console.log(`Building .NET solution: ${dotnetSolutionFiles[0]}`);
+        executeBuildCommand(`dotnet build "${dotnetSolutionFiles[0]}"`);
+        return;
+      } else if (dotnetSolutionFiles.length > 1) {
+        console.log("Multiple .NET solution files found.");
 
-        // Check if it's a React project (presence of react-scripts)
-        if (packageJson.dependencies && packageJson.dependencies['react-scripts']) {
-          console.log('Building React project...');
-          executeBuildCommand('npm run build');
-        } else {
-          // Otherwise, assume it's a Node.js project
-          console.log('Building Node.js project...');
-          executeBuildCommand('npm run build'); // Fallback to npm run build for Node.js
-        }
-      } else if (nodeProjects.length > 1) {
-        console.log("There is more than 1 project file. The potential executables for building are:");
-        nodeProjects.forEach(file => console.log(file));
+        const { selectedSolution } = await inquirer.prompt([
+          {
+            type: 'list',
+            name: 'selectedSolution',
+            message: 'Please select a solution to build:',
+            choices: dotnetSolutionFiles,
+          },
+        ]);
+
+        console.log(`Building .NET solution: ${selectedSolution}`);
+        executeBuildCommand(`dotnet build "${selectedSolution}"`);
+        return;
       } else {
-        console.log("No project files found to build.");
+        // Check for Node.js and React projects (using package.json)
+        const nodeProjects = await findFilesByName(currentDir, 'package.json');
+        if (nodeProjects.length === 1) {
+          const packageJsonPath = nodeProjects[0];
+          let packageJson;
+
+          try {
+            packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+          } catch (error) {
+            console.error(`Failed to parse package.json at ${packageJsonPath}:`, error.message);
+            return;
+          }
+
+          const dependencies = {
+            ...packageJson.dependencies,
+            ...packageJson.devDependencies,
+          };
+
+          if (dependencies && dependencies['react-scripts']) {
+            console.log('Building React project...');
+            executeBuildCommand('npm run build');
+          } else {
+            // Check if a 'build' script exists
+            if (packageJson.scripts && packageJson.scripts.build) {
+              console.log('Building Node.js project...');
+              executeBuildCommand('npm run build');
+            } else {
+              console.log("No 'build' script found in package.json.");
+              // Optionally prompt the user or execute a default action
+              const { runDefault } = await inquirer.prompt([
+                {
+                  type: 'confirm',
+                  name: 'runDefault',
+                  message: "No 'build' script is defined. Do you want to run 'npm start' instead?",
+                  default: true,
+                },
+              ]);
+
+              if (runDefault) {
+                executeBuildCommand('npm start');
+              } else {
+                console.log('Build process aborted.');
+              }
+            }
+          }
+        } else if (nodeProjects.length > 1) {
+          console.log("Multiple Node.js projects found.");
+
+          const { selectedPackageJson } = await inquirer.prompt([
+            {
+              type: 'list',
+              name: 'selectedPackageJson',
+              message: 'Please select a project to build:',
+              choices: nodeProjects,
+            },
+          ]);
+
+          const packageJsonPath = selectedPackageJson;
+          let packageJson;
+
+          try {
+            packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+          } catch (error) {
+            console.error(`Failed to parse package.json at ${packageJsonPath}:`, error.message);
+            return;
+          }
+
+          const dependencies = {
+            ...packageJson.dependencies,
+            ...packageJson.devDependencies,
+          };
+
+          if (dependencies && dependencies['react-scripts']) {
+            console.log('Building React project...');
+            executeBuildCommand('npm run build');
+          } else {
+            // Check if a 'build' script exists
+            if (packageJson.scripts && packageJson.scripts.build) {
+              console.log('Building Node.js project...');
+              executeBuildCommand('npm run build');
+            } else {
+              console.log("No 'build' script found in package.json.");
+              const { runDefault } = await inquirer.prompt([
+                {
+                  type: 'confirm',
+                  name: 'runDefault',
+                  message: "No 'build' script is defined. Do you want to run 'npm start' instead?",
+                  default: true,
+                },
+              ]);
+
+              if (runDefault) {
+                executeBuildCommand('npm start');
+              } else {
+                console.log('Build process aborted.');
+              }
+            }
+          }
+        } else {
+          console.log("No project files found to build.");
+        }
       }
+    } catch (error) {
+      console.error("An error occurred during the build process:", error.message);
     }
   });
-
+  
 // Helper functions
 
-async function findFilesByExtension(dir, extension) {
+async function findFilesByExtension(dir, extension, excludeDirs = ['node_modules', '.git']) {
   let results = [];
-  const files = await fs.readdir(dir);  // Ensure you're awaiting this
+  let files;
+
+  try {
+    files = await fs.readdir(dir);
+  } catch (error) {
+    console.error(`Failed to read directory ${dir}:`, error.message);
+    return results;
+  }
 
   for (const file of files) {
     const filePath = path.join(dir, file);
-    const stat = await fs.stat(filePath);  // Ensure you're awaiting this
+    let stat;
+
+    try {
+      stat = await fs.stat(filePath);
+    } catch (error) {
+      console.error(`Failed to get stats of file ${filePath}:`, error.message);
+      continue;
+    }
 
     if (stat.isDirectory()) {
-      results = results.concat(await findFilesByExtension(filePath, extension));
+      if (!excludeDirs.includes(file)) {
+        const subDirResults = await findFilesByExtension(filePath, extension, excludeDirs);
+        results = results.concat(subDirResults);
+      }
     } else if (file.endsWith(extension)) {
       results.push(filePath);
     }
@@ -171,16 +282,33 @@ async function findFilesByExtension(dir, extension) {
   return results;
 }
 
-async function findFilesByName(dir, filename) {
+async function findFilesByName(dir, filename, excludeDirs = ['node_modules', '.git']) {
   let results = [];
-  const files = await fs.readdir(dir);  // Ensure you're awaiting this
+  let files;
+
+  try {
+    files = await fs.readdir(dir);
+  } catch (error) {
+    console.error(`Failed to read directory ${dir}:`, error.message);
+    return results;
+  }
 
   for (const file of files) {
     const filePath = path.join(dir, file);
-    const stat = await fs.stat(filePath);  // Ensure you're awaiting this
+    let stat;
+
+    try {
+      stat = await fs.stat(filePath);
+    } catch (error) {
+      console.error(`Failed to get stats of file ${filePath}:`, error.message);
+      continue;
+    }
 
     if (stat.isDirectory()) {
-      results = results.concat(await findFilesByName(filePath, filename));
+      if (!excludeDirs.includes(file)) {
+        const subDirResults = await findFilesByName(filePath, filename, excludeDirs);
+        results = results.concat(subDirResults);
+      }
     } else if (file === filename) {
       results.push(filePath);
     }
@@ -191,8 +319,7 @@ async function findFilesByName(dir, filename) {
 
 function executeBuildCommand(command) {
   try {
-    const result = execSync(command, { stdio: 'inherit' });
-    console.log(result.toString());
+    execSync(command, { stdio: 'inherit' });
   } catch (error) {
     console.error(`Error executing command: ${command}`);
     console.error(error.message);
